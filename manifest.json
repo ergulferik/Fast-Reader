@@ -1,29 +1,24 @@
 {
   "manifest_version": 3,
   "name": "Fast Reader",
-  "version": "2.0",
+  "version": "2.0.0",
   "description": "Read selected text word by word in fullscreen mode.",
   "permissions": ["activeTab", "scripting", "storage"],
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_icon": {
-      "128": "assets/icons/icon.png"
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
     }
   },
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "src/hud/hud.html",
-        "src/hud/hud.js",
-        "src/styles/styles.css",
-        "assets/icons/icon.png",
-        "assets/icons/ef.png"
-      ],
-      "matches": ["<all_urls>"]
-    }
-  ],
   "icons": {
-    "128": "assets/icons/icon.png"
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "src/background.js"
   },
   "content_scripts": [
     {
@@ -31,5 +26,17 @@
       "js": ["src/content/content.js"],
       "css": ["src/styles/content.css"]
     }
-  ]
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/hud/hud.html",
+        "src/hud/hud.js",
+        "src/styles/*.css",
+        "assets/icons/*"
+      ],
+      "matches": ["*://*/*"]
+    }
+  ],
+  "host_permissions": ["*://*/*"]
 }
