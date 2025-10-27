@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fast Reader - Text Input</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="popup-container">
+      <div class="popup-header">
+        <h1 class="popup-title">Fast Reader</h1>
+        <p class="popup-subtitle">Enter text to read</p>
+      </div>
+
+      <div class="popup-body">
+        <textarea
+          id="textInput"
+          class="text-input"
+          placeholder="Enter or paste your text here..."
+          rows="10"
+        ></textarea>
+        <div class="input-actions">
+          <button id="startBtn" class="action-btn btn-primary">
+            Start
+          </button>
+          <button id="clearBtn" class="action-btn btn-secondary">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="popup-footer">
+        <a href="https://ergulferik.github.io/Portfolio-Website/" target="_blank" class="creator-credit">
+          <img src="../assets/icons/ef.png" alt="Ergül Ferik" class="creator-icon" />
+          <span>Powered by Ergül Ferik</span>
+        </a>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
+

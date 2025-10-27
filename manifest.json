@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Fast Reader",
+  "version": "2.0",
+  "description": "Read selected text word by word in fullscreen mode.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "128": "assets/icons/icon.png"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/hud/hud.html",
+        "src/hud/hud.js",
+        "src/styles/styles.css",
+        "assets/icons/icon.png",
+        "assets/icons/ef.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "128": "assets/icons/icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/content.js"],
+      "css": ["src/styles/content.css"]
+    }
+  ]
+}

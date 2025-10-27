@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fast Reader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/styles.css" />
+  </head>
+  <body class="fast-reader-hud">
+    <button id="closeBtn" class="close-btn" title="Close Fast Reader">✖</button>
+    <div class="fast-reader-controls">
+      <h2 class="title">Fast Reader</h2>
+
+      <div class="speed-control">
+        <label for="speed">Reading Speed:</label>
+        <div class="speed-display"><span id="speedValue">250</span> words/min</div>
+        <input id="speed" type="range" min="100" max="1000" value="250" />
+      </div>
+
+      <div class="progress-info">
+        <span id="wordCount">0 / 0</span>
+        <div class="progress-bar">
+          <div id="progress" class="progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button id="startBtn" class="btn btn-primary">Start</button>
+        <button id="pauseBtn" class="btn btn-secondary" disabled>Pause</button>
+        <button id="resetBtn" class="btn btn-secondary">Reset</button>
+      </div>
+    </div>
+
+    <div id="wordDisplay" class="fast-reader-word-display">
+      <div class="text-preview">
+        <div id="readPart" class="read-part"></div>
+      </div>
+      <div class="word-container">
+        <span id="prevWord" class="word-context prev-word"></span>
+        <span id="currentWord" class="current-word"></span>
+        <span id="nextWord" class="word-context next-word"></span>
+      </div>
+      <div class="text-preview">
+        <div id="unreadPart" class="unread-part"></div>
+      </div>
+    </div>
+
+    <div class="keyboard-shortcuts">
+      <div class="shortcut"><kbd>Space</kbd> - Play/Pause</div>
+      <div class="shortcut"><kbd>R</kbd> - Reset</div>
+      <div class="shortcut"><kbd>Esc</kbd> - Close</div>
+    </div>
+
+    <script src="hud.js"></script>
+  </body>
+</html>
