@@ -69,6 +69,7 @@ fast-reader-extension/
 │   │   ├── hud.html
 │   │   └── hud.js
 │   └── styles/               # Shared stylesheets
+│       └── content.css
 │       └── styles.css
 └── assets/
     └── icons/                # Extension icons
@@ -114,19 +115,6 @@ Fast Reader follows modern UI/UX principles:
 - **Accessibility**: Keyboard shortcuts and focus states
 - **Responsive Design**: Works on different screen sizes
 - **Glassmorphism**: Modern blur effects for depth
-
-## 🔮 Future Improvements
-
-- [ ] Multiple reading modes (word-by-word, sentence-by-sentence)
-- [ ] Customizable color themes
-- [ ] Reading statistics and analytics
-- [ ] Bookmark and sync text inputs
-- [ ] Voice reading option
-- [ ] Export reading history
-- [ ] Integration with popular reading services
-- [ ] Mobile browser support
-- [ ] Translation feature
-- [ ] Custom focus point adjustments
 
 ## 🤝 Contributing
 
