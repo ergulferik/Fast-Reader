@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Fast Reader",
   "version": "2.0.0",
-  "description": "Read selected text word by word in fullscreen mode.",
-  "permissions": ["activeTab", "scripting", "storage"],
+  "description": "A simple Chrome extension for speed reading — shows selected text word by word in fullscreen for better focus.",
+  "permissions": ["activeTab", "scripting", "storage", "contextMenus", "windows"],
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_icon": {
