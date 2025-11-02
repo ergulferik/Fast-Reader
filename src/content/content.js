@@ -1,6 +1,19 @@
 let fastReaderIcon = null;
 let currentIframe = null;
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "OPEN_FREAD_HUD") {
+    if (message.text && message.text.length >= 10) {
+      startFastReader(message.text);
+      sendResponse({ success: true });
+    } else {
+      // popup.html dosyasını pencere olarak aç
+      chrome.runtime.sendMessage({ type: "OPEN_POPUP_WINDOW" });
+      sendResponse({ success: true });
+    }
+  }
+});
+
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "START_FAST_READER_FROM_POPUP") {
