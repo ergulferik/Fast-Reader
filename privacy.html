@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Privacy Policy — Fast Reader</title>
+  <style>
+    body { font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif; line-height:1.6; color:#111; background:#f7f7f8; margin:0; padding:0; }
+    .container { max-width:900px; margin:48px auto; background:#fff; border-radius:10px; box-shadow:0 6px 22px rgba(15,15,15,0.06); padding:28px; }
+    h1 { margin-top:0; color:#ff7a00; }
+    h2 { margin-bottom:8px; color:#222; }
+    p { margin:12px 0; }
+    code { background:#f2f2f2; padding:2px 6px; border-radius:4px; font-family:monospace; }
+    ul { margin:8px 0 16px 20px; }
+    .muted { color:#555; font-size:0.95rem; }
+    .footer { margin-top:28px; padding-top:18px; border-top:1px solid #eee; color:#666; font-size:0.9rem; }
+    a { color:#ff7a00; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <p class="muted">Last updated: <strong><!-- YYYY-MM-DD -->2025-11-02</strong></p>
+
+    <h2>Overview</h2>
+    <p>
+      <strong>Fast Reader</strong> is a lightweight Chrome extension whose sole purpose is to help users read text faster by displaying selected text word-by-word in a fullscreen, distraction-free view.
+      This extension <strong>does not collect, store, or share personal user data</strong>.
+    </p>
+
+    <h2>Data collection</h2>
+    <p>
+      Fast Reader performs all processing locally in the user's browser. The extension does not:
+    </p>
+    <ul>
+      <li>Collect or transmit selected text to any remote servers.</li>
+      <li>Store any personal data on external servers.</li>
+      <li>Use cookies or third-party trackers for analytics or advertising.</li>
+    </ul>
+
+    <h2>Permissions and why they are required</h2>
+    <p class="muted">The extension requests only the permissions necessary for its single purpose:</p>
+    <ul>
+      <li><strong><code>activeTab</code></strong> — to read the currently selected text on the active tab so it can be displayed in the reader interface.</li>
+      <li><strong><code>contextMenus</code></strong> — to add the right-click menu entry (e.g. <em>“FRead ile”</em>) that allows users to quickly open the reader for selected text.</li>
+      <li><strong><code>scripting</code></strong> — to inject a small, minimal content script that collects the selection and creates the reader overlay (all executed locally).</li>
+      <li><strong><code>storage</code></strong> — to save local preferences such as reading speed or font size on the user's device only.</li>
+      <li><strong>Host permissions</strong> (if requested) — limited to the sites where the user enables the extension, required to allow the extension to operate across web pages the user visits.</li>
+    </ul>
+
+    <h2>Remote code</h2>
+    <p>
+      This extension does <strong>not</strong> download or execute any remote code. All functionality is contained within the packaged extension files.
+    </p>
+
+    <h2>User controls</h2>
+    <p>
+      Users control the extension at all times: the reader opens only when a user selects text and triggers the extension (via the toolbar, right-click menu, or popup). Users can close the reader immediately and change options such as speed and font size. Preferences saved with <code>chrome.storage</code> remain on the user's device unless the user clears their browser data.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      If you have any questions about this privacy policy, please contact the <a href="https://ergulferik.github.io/Portfolio-Website/" target="_blank">developer</a>: <br />
+      <strong>eng.ergulferik@gmail.com</strong>
+    </p>
+
+    <div class="footer">
+      <p class="muted">
+        Fast Reader — a simple speed reading extension. This policy was created to describe the data practices of the extension and to comply with Chrome Web Store requirements.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
