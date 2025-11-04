@@ -3,7 +3,7 @@
   "name": "Fast Reader",
   "version": "2.0.0",
   "description": "A simple Chrome extension for speed reading — shows selected text word by word in fullscreen for better focus.",
-  "permissions": ["activeTab", "scripting", "storage", "contextMenus", "windows"],
+  "permissions": ["activeTab", "storage", "contextMenus", "windows"],
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_icon": {
