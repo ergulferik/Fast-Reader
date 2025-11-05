@@ -1,25 +1,19 @@
-// DOM Elements
 const textInput = document.getElementById("textInput");
 const startBtn = document.getElementById("startBtn");
 const clearBtn = document.getElementById("clearBtn");
 
-// Initialize
 document.addEventListener("DOMContentLoaded", () => {
-  // Load saved text if any
   loadSavedText();
 
-  // Auto-focus textarea on load
   textInput.focus();
 });
 
-// Clear button handler
 clearBtn.addEventListener("click", () => {
   textInput.value = "";
   textInput.focus();
   saveText();
 });
 
-// Start button handler
 startBtn.addEventListener("click", async () => {
   const text = textInput.value.trim();
 
@@ -28,38 +22,31 @@ startBtn.addEventListener("click", async () => {
     return;
   }
 
-  // Send text to content script
   await sendTextToContentScript(text);
 });
 
-// Handle Enter key in textarea
 textInput.addEventListener("keydown", (e) => {
   if (e.ctrlKey && e.key === "Enter") {
     startBtn.click();
   }
 });
 
-// Auto-save while typing
 textInput.addEventListener("input", () => {
   saveText();
 });
 
-// Send text to content script
 async function sendTextToContentScript(text) {
   try {
     startBtn.disabled = true;
     startBtn.classList.add("loading");
 
-    // Get active tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    // Send message to content script
     await chrome.tabs.sendMessage(tab.id, {
       type: "START_FAST_READER_FROM_POPUP",
       text: text,
     });
 
-    // Close popup after sending
     setTimeout(() => {
       window.close();
     }, 300);
@@ -71,13 +58,11 @@ async function sendTextToContentScript(text) {
   }
 }
 
-// Save text to chrome.storage
 function saveText() {
   const text = textInput.value;
   chrome.storage.local.set({ popupTextInput: text });
 }
 
-// Load saved text from chrome.storage
 async function loadSavedText() {
   try {
     const result = await chrome.storage.local.get(["popupTextInput"]);
@@ -89,9 +74,7 @@ async function loadSavedText() {
   }
 }
 
-// Show error message
 function showError(message) {
-  // Create error notification
   const errorDiv = document.createElement("div");
   errorDiv.className = "error-notification";
   errorDiv.textContent = message;
@@ -119,7 +102,6 @@ function showError(message) {
   }, 3000);
 }
 
-// Add animations
 const style = document.createElement("style");
 style.textContent = `
   @keyframes slideDown {
@@ -145,4 +127,3 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
-

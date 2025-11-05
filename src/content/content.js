@@ -7,14 +7,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       startFastReader(message.text);
       sendResponse({ success: true });
     } else {
-      // popup.html dosyasını pencere olarak aç
       chrome.runtime.sendMessage({ type: "OPEN_POPUP_WINDOW" });
       sendResponse({ success: true });
     }
   }
 });
 
-// Listen for messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "START_FAST_READER_FROM_POPUP") {
     const text = message.text;
@@ -23,7 +21,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// Seçim temizlendiğinde icon'u kaldır
 document.addEventListener("selectionchange", () => {
   const selectedText = window.getSelection().toString().trim();
   if (!selectedText && fastReaderIcon) {
@@ -34,9 +31,7 @@ document.addEventListener("selectionchange", () => {
 
 document.addEventListener("mouseup", (e) => {
   const selectedText = window.getSelection().toString().trim();
-  const text = selectedText.split(/\s+/).filter(word => word.length > 0);
-  console.log(text);
-  // Eğer seçim yoksa icon'u kaldır
+  const text = selectedText.split(/\s+/).filter((word) => word.length > 0);
   if (!selectedText) {
     if (fastReaderIcon) {
       fastReaderIcon.remove();
@@ -53,39 +48,33 @@ document.addEventListener("mouseup", (e) => {
     }
   }
 
-  // Eğer zaten bir icon varsa kaldır
   if (fastReaderIcon) {
     fastReaderIcon.remove();
     fastReaderIcon = null;
   }
 
-  // Yeni icon oluştur
   fastReaderIcon = document.createElement("div");
   fastReaderIcon.classList.add("fast-reader-icon");
-  
-  // İkon görseli oluştur
+
   const iconImg = document.createElement("img");
   iconImg.src = chrome.runtime.getURL("assets/icons/icon.png");
   iconImg.alt = "Fast Reader";
   iconImg.style.width = "100%";
   iconImg.style.height = "100%";
   iconImg.style.objectFit = "contain";
-  
+
   fastReaderIcon.appendChild(iconImg);
   fastReaderIcon.title = "Fast Reader - Click to read selected text";
 
-  // Icon pozisyonunu ayarla (ekran sınırları içinde kalması için)
   const iconSize = 36;
   const margin = 12;
   let left = e.pageX + margin;
   let top = e.pageY - margin;
 
-  // Sağ kenar kontrolü
   if (left + iconSize > window.innerWidth) {
     left = e.pageX - iconSize - margin;
   }
 
-  // Alt kenar kontrolü
   if (top + iconSize > window.innerHeight) {
     top = e.pageY - iconSize - margin;
   }
@@ -95,18 +84,15 @@ document.addEventListener("mouseup", (e) => {
 
   document.body.appendChild(fastReaderIcon);
 
-  // Icon'a tıklama eventi ekle
   fastReaderIcon.addEventListener("mousedown", (event) => {
     event.preventDefault();
     event.stopPropagation();
 
-    // Icon'u hemen kaldır
     removeFastReaderIcon();
 
     startFastReader(selectedText);
   });
 
-  // 5 saniye sonra icon'u otomatik kaldır
   setTimeout(() => {
     removeFastReaderIcon();
   }, 4000);
@@ -120,7 +106,6 @@ function removeFastReaderIcon() {
 }
 
 function startFastReader(selectedText) {
-  // Eğer zaten bir iframe varsa kaldır
   if (currentIframe) {
     currentIframe.remove();
   }
@@ -137,12 +122,10 @@ function startFastReader(selectedText) {
   document.body.appendChild(iframe);
   currentIframe = iframe;
 
-  // Mesaj gönder: seçilen metin
   iframe.onload = () => {
     iframe.contentWindow.postMessage({ type: "INIT_FAST_READER", text: selectedText }, "*");
   };
 
-  // HUD kapatma isteğini dinle
   const messageHandler = (event) => {
     if (event.data.type === "CLOSE_FAST_READER") {
       iframe.remove();
