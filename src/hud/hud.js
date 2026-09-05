@@ -1,226 +1,132 @@
-let words = [];
-let index = 0;
-let interval = null;
-let wordsPerMinute = 250;
-let paused = false;
-let isReading = false;
+import {
+  DEFAULT_SETTINGS, splitWords, estimateRemainingMs, formatDuration, orpIndex,
+} from "../shared/settings.js";
 
-const elements = {
-  speed: document.getElementById("speed"),
-  speedValue: document.getElementById("speedValue"),
-  startBtn: document.getElementById("startBtn"),
-  pauseBtn: document.getElementById("pauseBtn"),
-  resetBtn: document.getElementById("resetBtn"),
-  closeBtn: document.getElementById("closeBtn"),
-  currentWord: document.getElementById("currentWord"),
-  prevWord: document.getElementById("prevWord"),
-  nextWord: document.getElementById("nextWord"),
-  readPart: document.getElementById("readPart"),
-  unreadPart: document.getElementById("unreadPart"),
-  wordCount: document.getElementById("wordCount"),
-  progress: document.getElementById("progress"),
+let words = [], index = 0, interval = null;
+let wordsPerMinute = DEFAULT_SETTINGS.defaultWpm;
+let paused = false, isReading = false;
+let settings = { ...DEFAULT_SETTINGS };
+
+const $ = (id) => document.getElementById(id);
+const el = {
+  speed: $("speed"), speedValue: $("speedValue"),
+  startBtn: $("startBtn"), pauseBtn: $("pauseBtn"), resetBtn: $("resetBtn"), closeBtn: $("closeBtn"),
+  currentWord: $("currentWord"), prevWord: $("prevWord"), nextWord: $("nextWord"),
+  readPart: $("readPart"), unreadPart: $("unreadPart"),
+  wordCount: $("wordCount"), remaining: $("remaining"), progress: $("progress"),
+  orpGuide: $("orpGuide"),
 };
 
-window.addEventListener("message", (event) => {
+async function loadSettings() {
+  try {
+    const res = await chrome.storage.local.get(["settings"]);
+    settings = { ...DEFAULT_SETTINGS, ...(res.settings || {}) };
+  } catch { settings = { ...DEFAULT_SETTINGS }; }
+  wordsPerMinute = settings.defaultWpm;
+  el.speed.value = wordsPerMinute;
+  el.speedValue.textContent = wordsPerMinute;
+  el.orpGuide.hidden = !settings.orp;
+}
+
+window.addEventListener("message", async (event) => {
   if (event.data.type === "INIT_FAST_READER") {
-    const text = event.data.text;
-    words = text.split(/\s+/).filter((word) => word.length > 0);
+    await loadSettings();
+    words = splitWords(event.data.text);
     index = 0;
-    updateWordCount();
-    updateProgress();
-    updateTextPreview();
-    elements.currentWord.textContent = "Ready to start...";
-    elements.prevWord.textContent = "";
-    elements.nextWord.textContent = "";
+    updateAll();
+    el.currentWord.textContent = "Başlamaya hazır...";
+    el.prevWord.textContent = ""; el.nextWord.textContent = "";
   }
 });
 
-elements.speed.addEventListener("input", (e) => {
+el.speed.addEventListener("input", (e) => {
   wordsPerMinute = Number(e.target.value);
-  elements.speedValue.textContent = wordsPerMinute;
-
-  if (isReading && !paused) {
-    clearInterval(interval);
-    startReading();
-  }
+  el.speedValue.textContent = wordsPerMinute;
+  updateRemaining();
+  if (isReading && !paused) { clearInterval(interval); startReading(); }
 });
 
-elements.startBtn.addEventListener("click", () => {
+el.startBtn.addEventListener("click", () => {
   if (!words.length) return;
-
-  isReading = true;
-  paused = false;
-  elements.startBtn.disabled = true;
-  elements.pauseBtn.disabled = false;
-  elements.pauseBtn.textContent = "Pause";
-
+  isReading = true; paused = false;
+  el.startBtn.disabled = true; el.pauseBtn.disabled = false; el.pauseBtn.textContent = "Duraklat";
   startReading();
 });
-
-elements.pauseBtn.addEventListener("click", () => {
-  if (paused) {
-    paused = false;
-    elements.pauseBtn.textContent = "Pause";
-    startReading();
-  } else {
-    paused = true;
-    elements.pauseBtn.textContent = "Resume";
-    clearInterval(interval);
-  }
+el.pauseBtn.addEventListener("click", () => {
+  if (paused) { paused = false; el.pauseBtn.textContent = "Duraklat"; startReading(); }
+  else { paused = true; el.pauseBtn.textContent = "Devam"; clearInterval(interval); }
 });
-
-elements.resetBtn.addEventListener("click", () => {
-  resetReader();
-});
-
-elements.closeBtn.addEventListener("click", () => {
+el.resetBtn.addEventListener("click", resetReader);
+el.closeBtn.addEventListener("click", () => {
   clearInterval(interval);
   window.parent.postMessage({ type: "CLOSE_FAST_READER" }, "*");
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.code === "Space") {
-    e.preventDefault();
-    if (isReading) {
-      elements.pauseBtn.click();
-    } else {
-      elements.startBtn.click();
-    }
-  } else if (e.key === "r" || e.key === "R") {
-    resetReader();
-  } else if (e.code === "Escape") {
-    e.preventDefault();
-    elements.closeBtn.click();
-  }
+  if (e.code === "Space") { e.preventDefault(); isReading ? el.pauseBtn.click() : el.startBtn.click(); }
+  else if (e.key === "r" || e.key === "R") resetReader();
+  else if (e.code === "Escape") { e.preventDefault(); el.closeBtn.click(); }
 });
 
 function startReading() {
   clearInterval(interval);
-
   const speedInMs = (60 * 1000) / wordsPerMinute;
-
   interval = setInterval(() => {
     if (paused) return;
-
     if (index >= words.length) {
-      clearInterval(interval);
-      isReading = false;
-      elements.startBtn.disabled = false;
-      elements.pauseBtn.disabled = true;
-      elements.pauseBtn.textContent = "Pause";
-      elements.readPart.textContent += " " + elements.currentWord.textContent;
-      elements.currentWord.textContent = "Reading completed!";
-      elements.prevWord.textContent = "";
+      clearInterval(interval); isReading = false;
+      el.startBtn.disabled = false; el.pauseBtn.disabled = true; el.pauseBtn.textContent = "Duraklat";
+      el.currentWord.textContent = "Okuma tamamlandı!";
+      el.prevWord.textContent = ""; el.nextWord.textContent = "";
       return;
     }
-
-    showWord(words[index]);
-    index++;
-    updateWordCount();
-    updateProgress();
+    showWord(words[index]); index++; updateAll();
   }, speedInMs);
 }
 
 function showWord(word) {
-  const formattedWord = formatWordWithCenterHighlight(word);
-  elements.currentWord.innerHTML = formattedWord;
-
-  const isCurrentWordLong = word.length > 12;
-  const prevWord = index > 0 ? words[index - 1] : "";
-  const nextWord = index < words.length - 1 ? words[index + 1] : "";
-
-  if (isCurrentWordLong) {
-    elements.prevWord.textContent = "";
-    elements.nextWord.textContent = "";
-    elements.currentWord.classList.add("long-word");
-    elements.prevWord.classList.remove("long-word");
-    elements.nextWord.classList.remove("long-word");
-  } else {
-    elements.prevWord.textContent = prevWord;
-    elements.nextWord.textContent = nextWord;
-    elements.currentWord.classList.remove("long-word");
-
-    elements.prevWord.classList.toggle("long-word", prevWord.length > 12);
-    elements.nextWord.classList.toggle("long-word", nextWord.length > 12);
-  }
-
+  el.currentWord.innerHTML = formatWordWithCenterHighlight(word);
+  const isLong = word.length > 12;
+  const showContext = settings.contextWords && !isLong;
+  const prev = showContext && index > 0 ? words[index - 1] : "";
+  const next = showContext && index < words.length - 1 ? words[index + 1] : "";
+  el.prevWord.textContent = prev; el.nextWord.textContent = next;
+  el.currentWord.classList.toggle("long-word", isLong);
+  el.prevWord.classList.toggle("long-word", prev.length > 12);
+  el.nextWord.classList.toggle("long-word", next.length > 12);
   updateTextPreview();
 }
 
 function formatWordWithCenterHighlight(word) {
-  if (!word || word.length === 0) return word;
-
-  const length = word.length;
-
-  if (length === 1) {
-    return `<span class="center-char">${word}</span>`;
-  } else if (length % 2 === 0) {
-    const mid1 = length / 2 - 1;
-    const mid2 = length / 2;
-    return word
-      .split("")
-      .map((char, index) => {
-        if (index === mid1 || index === mid2) {
-          return `<span class="center-char">${char}</span>`;
-        }
-        return char;
-      })
-      .join("");
-  } else {
-    const mid = Math.floor(length / 2);
-    return word
-      .split("")
-      .map((char, index) => {
-        if (index === mid) {
-          return `<span class="center-char">${char}</span>`;
-        }
-        return char;
-      })
-      .join("");
-  }
+  if (!word) return word;
+  const mid = orpIndex(word.length);
+  const isEven = word.length > 1 && word.length % 2 === 0;
+  return word.split("").map((ch, i) => {
+    if (i === mid || (isEven && i === mid + 1)) return `<span class="center-char">${ch}</span>`;
+    return ch;
+  }).join("");
 }
 
-function updateWordCount() {
-  elements.wordCount.textContent = `${index} / ${words.length}`;
-}
-
+function updateAll() { updateWordCount(); updateProgress(); updateRemaining(); updateTextPreview(); }
+function updateWordCount() { el.wordCount.textContent = `${index} / ${words.length}`; }
 function updateProgress() {
-  const percentage = words.length > 0 ? (index / words.length) * 100 : 0;
-  elements.progress.style.width = `${percentage}%`;
+  el.progress.style.width = `${words.length ? (index / words.length) * 100 : 0}%`;
 }
-
+function updateRemaining() {
+  el.remaining.textContent = formatDuration(estimateRemainingMs(Math.max(0, words.length - index), wordsPerMinute));
+}
 function updateTextPreview() {
-  if (words.length === 0) return;
-
-  const readWords = words.slice(0, index);
-  elements.readPart.textContent = readWords.join(" ");
-
-  elements.readPart.scrollTo({
-    top: readPart.scrollHeight,
-    behavior: "smooth",
-  });
-
-  const unreadWords = words.slice(index + 1);
-  elements.unreadPart.textContent = unreadWords.join(" ");
+  if (!words.length) { el.readPart.textContent = ""; el.unreadPart.textContent = ""; return; }
+  el.readPart.textContent = words.slice(0, index).join(" ");
+  el.readPart.scrollTo({ top: el.readPart.scrollHeight, behavior: "smooth" });
+  el.unreadPart.textContent = words.slice(index + 1).join(" ");
 }
 
 function resetReader() {
-  clearInterval(interval);
-  index = 0;
-  isReading = false;
-  paused = false;
-
-  elements.startBtn.disabled = false;
-  elements.pauseBtn.disabled = true;
-  elements.pauseBtn.textContent = "Pause";
-
-  updateWordCount();
-  updateProgress();
-  updateTextPreview();
-  elements.currentWord.textContent = "Ready to start...";
-  elements.currentWord.classList.remove("long-word");
-  elements.prevWord.textContent = "";
-  elements.nextWord.textContent = "";
-  elements.prevWord.classList.remove("long-word");
-  elements.nextWord.classList.remove("long-word");
+  clearInterval(interval); index = 0; isReading = false; paused = false;
+  el.startBtn.disabled = false; el.pauseBtn.disabled = true; el.pauseBtn.textContent = "Duraklat";
+  updateAll();
+  el.currentWord.textContent = "Başlamaya hazır..."; el.currentWord.classList.remove("long-word");
+  el.prevWord.textContent = ""; el.nextWord.textContent = "";
+  el.prevWord.classList.remove("long-word"); el.nextWord.classList.remove("long-word");
 }
