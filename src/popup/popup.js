@@ -80,12 +80,36 @@ els.startBtn.addEventListener("click", async () => {
   try {
     els.startBtn.disabled = true;
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    await chrome.tabs.sendMessage(tab.id, { type: "START_FAST_READER_FROM_POPUP", text });
+    await startInTab(tab, text);
     setTimeout(() => window.close(), 300);
   } catch (err) {
-    console.error(err); showError("Fast Reader başlatılamadı"); els.startBtn.disabled = false;
+    console.error(err);
+    showError(startErrorMessage(err));
+    els.startBtn.disabled = false;
   }
 });
+
+// Send the text to the tab's content script. If it isn't there yet — the page was
+// open before the extension was installed/updated, so the manifest content script
+// never ran — inject it on demand and retry.
+async function startInTab(tab, text) {
+  const msg = { type: "START_FAST_READER_FROM_POPUP", text };
+  try {
+    await chrome.tabs.sendMessage(tab.id, msg);
+  } catch {
+    await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["src/styles/content.css"] });
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["src/content/content.js"] });
+    await chrome.tabs.sendMessage(tab.id, msg);
+  }
+}
+
+function startErrorMessage(err) {
+  const m = (err && err.message) || "";
+  if (/chrome:\/\/|cannot access|extension gallery|chrome web store/i.test(m)) {
+    return "Bu sayfada çalışmıyor. Normal bir web sitesinde deneyin.";
+  }
+  return "Fast Reader başlatılamadı — sayfayı yenileyip tekrar deneyin.";
+}
 
 function showError(message) {
   const div = document.createElement("div");
