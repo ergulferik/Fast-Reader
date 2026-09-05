@@ -1,5 +1,8 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Native [hidden] must win even when a component sets display (e.g. .popup-body { display:flex }) */
+[hidden] { display: none !important; }
+
 body {
   font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--text);
