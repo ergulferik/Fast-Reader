@@ -7,7 +7,7 @@ import {
 
 test("DEFAULT_SETTINGS has expected shape", () => {
   assert.deepEqual(DEFAULT_SETTINGS,
-    { defaultWpm: 250, theme: "system", orp: true, contextWords: true });
+    { defaultWpm: 250, theme: "system", contextWords: true });
 });
 
 test("resolveTheme maps system to null, others passthrough", () => {

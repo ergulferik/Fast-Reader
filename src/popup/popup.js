@@ -6,7 +6,7 @@ const els = {
   settingsBtn: $("settingsBtn"), backBtn: $("backBtn"),
   readerView: $("readerView"), settingsView: $("settingsView"),
   defaultWpm: $("defaultWpm"), defaultWpmValue: $("defaultWpmValue"),
-  themeSeg: $("themeSeg"), orpToggle: $("orpToggle"), contextToggle: $("contextToggle"),
+  themeSeg: $("themeSeg"), contextToggle: $("contextToggle"),
 };
 
 let settings = { ...DEFAULT_SETTINGS };
@@ -23,7 +23,6 @@ async function loadSettings() {
   applyTheme(settings.theme);
   els.defaultWpm.value = settings.defaultWpm;
   els.defaultWpmValue.textContent = settings.defaultWpm;
-  els.orpToggle.checked = settings.orp;
   els.contextToggle.checked = settings.contextWords;
   els.themeSeg.querySelectorAll(".segmented__option").forEach((b) =>
     b.setAttribute("aria-pressed", String(b.dataset.themeValue === settings.theme)));
@@ -60,7 +59,6 @@ els.themeSeg.addEventListener("click", (e) => {
     b.setAttribute("aria-pressed", String(b === btn)));
   applyTheme(settings.theme); saveSettings();
 });
-els.orpToggle.addEventListener("change", (e) => { settings.orp = e.target.checked; saveSettings(); });
 els.contextToggle.addEventListener("change", (e) => { settings.contextWords = e.target.checked; saveSettings(); });
 
 // --- Giriş görünümü ---

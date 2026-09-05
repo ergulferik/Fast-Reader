@@ -14,7 +14,6 @@ const el = {
   currentWord: $("currentWord"), prevWord: $("prevWord"), nextWord: $("nextWord"),
   readPart: $("readPart"), unreadPart: $("unreadPart"),
   wordCount: $("wordCount"), remaining: $("remaining"), progress: $("progress"),
-  orpGuide: $("orpGuide"),
 };
 
 async function loadSettings() {
@@ -25,7 +24,6 @@ async function loadSettings() {
   wordsPerMinute = settings.defaultWpm;
   el.speed.value = wordsPerMinute;
   el.speedValue.textContent = wordsPerMinute;
-  el.orpGuide.hidden = !settings.orp;
 }
 
 window.addEventListener("message", async (event) => {

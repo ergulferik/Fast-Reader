@@ -1,7 +1,6 @@
 export const DEFAULT_SETTINGS = {
   defaultWpm: 250,
   theme: "system",
-  orp: true,
   contextWords: true,
 };
 
