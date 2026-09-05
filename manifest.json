@@ -32,7 +32,12 @@
       "resources": [
         "src/hud/hud.html",
         "src/hud/hud.js",
-        "src/styles/*.css",
+        "src/shared/settings.js",
+        "src/styles/tokens.css",
+        "src/styles/base.css",
+        "src/styles/components.css",
+        "src/styles/hud.css",
+        "src/styles/content.css",
         "assets/icons/*"
       ],
       "matches": ["*://*/*"]
