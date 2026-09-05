@@ -33,7 +33,7 @@
               transform var(--dur-fast) var(--ease-out);
 }
 .icon-btn:hover { color: var(--text); transform: scale(1.05); }
-.icon-btn--danger:hover { color: #fff; background: var(--danger); border-color: var(--danger); }
+.icon-btn--danger:hover { color: var(--neutral-000); background: var(--danger); border-color: var(--danger); }
 
 /* ---- Slider ---- */
 .slider {
