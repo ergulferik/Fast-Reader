@@ -4,6 +4,8 @@
 **Durum:** Tartışmaya hazır taslak (onay bekliyor)
 **Kapsam:** UI/UX yenileme için design system + mevcut 3 yüzeyin yenilenmesi + yeni ayarlar paneli + HUD okuma UX iyileştirmeleri
 
+**Kesinleşen kararlar:** Popup başlığı sade accent renk · HUD her zaman koyu · Ayarlar popup içi geçişli görünüm · Ayarlar'da Koyu/Açık/Sistem tema seçimi
+
 ---
 
 ## 1. Amaç ve Yön
@@ -93,26 +95,34 @@ Komponentler SADECE bunları kullanır. Koyu varsayılan, açık `@media` ile.
   --danger:         var(--red-500);
 }
 
+/* Açık palet — tek yerde tanımlanır, aşağıdaki üç seçici de bunu kullanır */
 @media (prefers-color-scheme: light) {
-  :root {
-    --surface:        var(--neutral-100);
-    --surface-raised: var(--neutral-000);
-    --surface-overlay: rgba(255, 255, 255, 0.78);
-    --border:         rgba(0, 0, 0, 0.08);
-    --border-strong:  rgba(0, 0, 0, 0.16);
-    --text:           var(--neutral-900);
-    --text-muted:     #57534e;
-    --text-faint:     rgba(0, 0, 0, 0.32);
-    --accent:         var(--orange-600); /* açıkta AA için biraz koyu */
-    --accent-hover:   var(--orange-500);
-    --accent-text:    #ffffff;
-    --focus-ring:     var(--orange-600);
-    --danger:         var(--red-500);
-  }
+  :root:not([data-theme="dark"]) { /* açık değerler */ }
 }
+:root[data-theme="light"] { /* açık değerler */ }
+
+/* Açık değerler (yukarıdaki iki seçicide aynen kullanılır) */
+/*
+  --surface: var(--neutral-100);  --surface-raised: var(--neutral-000);
+  --surface-overlay: rgba(255,255,255,.78);
+  --border: rgba(0,0,0,.08);      --border-strong: rgba(0,0,0,.16);
+  --text: var(--neutral-900);     --text-muted: #57534e;
+  --text-faint: rgba(0,0,0,.32);
+  --accent: var(--orange-600);    --accent-hover: var(--orange-500);
+  --accent-text: #fff;            --focus-ring: var(--orange-600);
+  --danger: var(--red-500);
+*/
 ```
 
-> Not: HUD şu an kullanıcının sayfası üzerine bindirilen bir iframe. İframe kendi `prefers-color-scheme`'ini kullanır; okuma odağı için HUD **koyu kalmayı** tercih edebilir (aşağıya bakın). Karar Bölüm 8'de.
+### 3c. Manuel tema override (KESİNLEŞTİ)
+Kullanıcı Ayarlar'dan **Koyu / Açık / Sistem** seçebilir. Mekanizma:
+
+- Varsayılan = **Sistem**: hiçbir attribute yok → `prefers-color-scheme` geçerli.
+- **Koyu** seçilince: `<html data-theme="dark">` → koyu değerler her koşulda kazanır.
+- **Açık** seçilince: `<html data-theme="light">` → açık değerler her koşulda kazanır.
+- Seçim `chrome.storage.local` içinde saklanır; popup ve ayarlar bu attribute'u `<html>`'e uygular.
+
+> **HUD her zaman koyu (KESİNLEŞTİ).** HUD, kullanıcının sayfası üzerine bindirilen ayrı bir iframe olduğundan okuma odağı için tema seçiminden **bağımsız**, sabit koyu paletle çalışır. HUD kökü `data-theme="dark"` sabitlenir; `prefers-color-scheme`'e tepki vermez.
 
 ---
 
@@ -179,10 +189,10 @@ Mevcut yapı korunur (başlık / textarea / aksiyonlar / kredi), token'lara taş
 
 Değişiklikler:
 - Genişlik 400px kalır; iç boşluklar `--space` ölçeğine oturur.
-- Başlıktaki gradyanlı metin **sade `--accent` renk** olur (rafine yön); istenirse tek ince gradyan hero olarak kalabilir — **karar noktası**.
+- Başlıktaki gradyanlı metin **sade `--accent` renk** olur (KESİNLEŞTİ — gradyan hero yok).
 - Butonlar yeni Button komponenti; uppercase kalkar.
-- **Yeni:** sağ üstte küçük bir **ayarlar (⚙) ikon butonu** → Ayarlar panelini açar.
-- Açık/koyu otomatik.
+- **Yeni:** sağ üstte küçük bir **ayarlar (⚙) ikon butonu** → popup içinde Ayarlar görünümüne geçer.
+- Tema: seçime göre (Koyu/Açık/Sistem); Sistem'de otomatik.
 
 ---
 
@@ -196,20 +206,20 @@ Sadece stil değil, okuma deneyimi de gelişir:
 - **İlerleme + kalan süre:** `x / y kelime` yanında tahmini kalan süre (WPM'den hesaplanır).
 - **Kısayol ipuçları:** sağ altta; `--kbd` rozetleri nötrleşir, kapatılabilir/soluk.
 - **Kapat:** IconButton, hover'da `--danger`.
-- HUD **koyu kalır** (okuma odağı için) — bkz. Bölüm 8 karar.
+- HUD **her zaman koyu** (tema seçiminden bağımsız — bkz. Bölüm 3c).
 
 ---
 
 ## 8. Yüzey 3 — Ayarlar Paneli (YENİ)
 
-Popup'tan (⚙) açılan hafif panel. `chrome.storage.local` ile kalıcı. Minimum, gerçekten değerli tercihler (YAGNI):
+**Popup içinde geçişli görünüm** (KESİNLEŞTİ — ayrı pencere yok). ⚙ ikonuna basınca popup, giriş görünümünden ayarlar görünümüne yumuşak geçer; üstte geri (←) oku. `chrome.storage.local` ile kalıcı. Minimum, gerçekten değerli tercihler (YAGNI):
 
-- **Varsayılan okuma hızı** (WPM) — slider.
-- **Tema** — Segmented: Koyu / Açık / Sistem. *(Not: kullanıcı "otomatik" seçti; manuel seçimi bu ayarla opsiyonel kılıyoruz — karar noktası: sadece otomatik mi, yoksa bu 3'lü seçim mi?)*
+- **Varsayılan okuma hızı** (WPM) — slider. HUD açılışta bunu kullanır.
+- **Tema** — Segmented: **Koyu / Açık / Sistem** (KESİNLEŞTİ). Seçim `<html data-theme>`'e uygulanır (bkz. 3c); popup + ayarlar yüzeyini etkiler, HUD hariç.
 - **ORP odak çizgisi** — Toggle (aç/kapa).
 - **Bağlam kelimeleri** — Toggle (önceki/sonraki kelimeleri göster/gizle).
 
-> Karar noktası: Ayarlar popup **içinde bir görünüm** mü (aynı pencere, geçişli) yoksa ayrı bir bölüm mü olsun? Öneri: popup içinde geçişli görünüm (yeni pencere maliyeti yok).
+Ayarlar durumu tek bir `settings` nesnesinde tutulur (`{ defaultWpm, theme, orp, contextWords }`); popup açılışında ve HUD başlangıcında okunur.
 
 ---
 
@@ -247,9 +257,9 @@ Migrasyon prensibi: her sabit renk/boşluk/yarıçap değeri karşılık gelen t
 
 ---
 
-## 12. Açık Karar Noktaları (gözden geçirmede netleşecek)
+## 12. Kararlar (kesinleşti)
 
-1. Popup başlığı: sade accent renk mi, tek ince gradyan hero mu?
-2. HUD teması: her zaman koyu mu, yoksa o da otomatik mi?
-3. Ayarlar: popup içi geçişli görünüm mü, ayrı panel mi?
-4. Tema kontrolü: sadece otomatik mi, yoksa Ayarlar'da Koyu/Açık/Sistem seçimi de olsun mu?
+1. **Popup başlığı:** sade `--accent` renk (gradyan hero yok).
+2. **HUD teması:** her zaman koyu, tema seçiminden bağımsız.
+3. **Ayarlar:** popup içi geçişli görünüm (ayrı pencere yok).
+4. **Tema kontrolü:** Ayarlar'da Koyu / Açık / Sistem seçimi; varsayılan Sistem (otomatik).
