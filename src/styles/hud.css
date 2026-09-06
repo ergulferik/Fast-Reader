@@ -132,23 +132,32 @@
   transition: none;
 }
 
+/* Pin the highlighted pivot (ORP) letter to a fixed focus point at the
+   horizontal centre: before | pivot | after as equal-flanked grid columns so
+   the coloured letter never drifts between words. */
 .current-word {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  width: 100%;
   font-size: clamp(3rem, 12vw, 10rem);
   font-weight: 200;
   line-height: 1.1;
   color: var(--text);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  word-break: break-word;
   letter-spacing: -2px;
+  white-space: nowrap;
   position: relative;
-  max-width: 100%;
-  overflow-wrap: break-word;
-  transition: none !important;
+  transition: none;
 }
+
+/* min-width:0 keeps both flanks equal (pivot stays centred) even when a long
+   word overflows the columns rather than pushing the pivot off-centre. */
+.current-word > .rsvp-before { text-align: right; min-width: 0; }
+.current-word > .rsvp-after { text-align: left; min-width: 0; }
+.current-word > .center-char { text-align: center; }
 
 .current-word.long-word {
   font-size: clamp(2rem, 8vw, 6rem);
-  transition: none !important;
 }
 
 .text-preview {

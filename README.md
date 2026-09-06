@@ -115,7 +115,7 @@ Fast Reader follows modern UI/UX principles:
 - **Accessibility**: Keyboard shortcuts and focus states
 - **Responsive Design**: Works on different screen sizes
 - **Glassmorphism**: Modern blur effects for depth
-- **Light & Dark**: otomatik + manuel tema seçimi
+- **Light & Dark**: automatic + manual theme selection
 
 ## 🤝 Contributing
 
@@ -146,10 +146,10 @@ This project is open source and available under the MIT License.
 ## 📊 Version History
 
 - **v3.0** (Current)
-  - Token tabanlı design system (koyu + otomatik açık tema)
-  - Popup içi ayarlar: varsayılan hız, tema (Koyu/Açık/Sistem), ORP ve bağlam toggle'ları
-  - HUD: ORP odak çizgisi, kalan süre göstergesi, rafine görünüm (parıltı/gradyan gürültüsü kaldırıldı)
-  - Erişilebilirlik: WCAG AA kontrast, tutarlı focus halkası, reduced-motion
+  - Token-based design system (dark + automatic light theme)
+  - In-popup settings: default speed, theme (Dark/Light/System), ORP and context toggles
+  - HUD: ORP focus line, remaining-time indicator, refined appearance (glow/gradient noise removed)
+  - Accessibility: WCAG AA contrast, consistent focus ring, reduced-motion
 
 - **v2.0** (Previous)
   - Added popup interface

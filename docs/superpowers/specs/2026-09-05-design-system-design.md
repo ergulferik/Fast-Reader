@@ -1,64 +1,64 @@
-# Fast Reader — Design System (v3) Tasarım Dokümanı
+# Fast Reader — Design System (v3) Design Document
 
-**Tarih:** 2026-09-05
-**Durum:** Tartışmaya hazır taslak (onay bekliyor)
-**Kapsam:** UI/UX yenileme için design system + mevcut 3 yüzeyin yenilenmesi + yeni ayarlar paneli + HUD okuma UX iyileştirmeleri
+**Date:** 2026-09-05
+**Status:** Draft ready for discussion (awaiting approval)
+**Scope:** Design system for the UI/UX refresh + refresh of the 3 existing surfaces + new settings panel + HUD reading UX improvements
 
-**Kesinleşen kararlar:** Popup başlığı sade accent renk · HUD her zaman koyu · Ayarlar popup içi geçişli görünüm · Ayarlar'da Koyu/Açık/Sistem tema seçimi
-
----
-
-## 1. Amaç ve Yön
-
-Fast Reader'ın yeni versiyonu için **mevcut görsel kimliği koruyup olgunlaştıran** bir tasarım sistemi kurmak. "Sıfırdan yeni bir görünüm" değil; **evrimleştirme**: aynı DNA (koyu tema + turuncu vurgu + hafif glassmorphism), ama:
-
-- Gradyan/parıltı (shimmer) gürültüsünü azalt, daha rafine gölge ve tipografi kullan.
-- Her şeyi **design token**'lara oturt (şu an renkler ~15 yerde elle yazılı).
-- **Otomatik koyu/açık tema** desteği ekle (`prefers-color-scheme`).
-- Mevcut tutarsızlıkları temizle.
-
-### Tasarım İlkeleri
-
-1. **Okuma önce gelir.** Kelime kahramandır; tüm kontroller geri çekilir. Süslemeler dikkati dağıtmamalı.
-2. **Tanıdık ama rafine.** Kullanıcı "aynı uygulama ama daha iyi" hissetmeli, "bambaşka bir şey" değil.
-3. **Sistematik.** Renk, boşluk, tipografi, yarıçap, gölge, hareket — hepsi token'dan gelir; elle sabit değer yazılmaz.
-4. **Erişilebilir.** Koyu+açık otomatik, WCAG AA kontrast, klavye öncelikli, `prefers-reduced-motion` ve `prefers-contrast` desteği.
+**Finalized decisions:** Popup title in a plain accent color · HUD always dark · Settings as an in-popup transitional view · Dark/Light/System theme selection in Settings
 
 ---
 
-## 2. Mevcut Durum Denetimi (nereden geliyoruz)
+## 1. Purpose and Direction
 
-| Alan | Şu an | Sorun |
+Establish a design system for the new version of Fast Reader that **preserves and matures the existing visual identity**. This is not "a brand-new look from scratch"; it is **evolution**: the same DNA (dark theme + orange accent + light glassmorphism), but:
+
+- Reduce gradient/shimmer noise; use more refined shadows and typography.
+- Put everything on **design tokens** (colors are currently hand-written in ~15 places).
+- Add **automatic dark/light theme** support (`prefers-color-scheme`).
+- Clean up existing inconsistencies.
+
+### Design Principles
+
+1. **Reading comes first.** The word is the hero; all controls recede. Decorations must not distract.
+2. **Familiar but refined.** The user should feel "the same app, but better," not "something completely different."
+3. **Systematic.** Color, spacing, typography, radius, shadow, motion — everything comes from tokens; no hand-written fixed values.
+4. **Accessible.** Automatic dark+light, WCAG AA contrast, keyboard-first, `prefers-reduced-motion` and `prefers-contrast` support.
+
+---
+
+## 2. Current-State Audit (where we're coming from)
+
+| Area | Current | Problem |
 |------|-------|-------|
-| Renk | `#ff6b35 → #f7931e` gradyanı elle ~15 yerde | Token yok; tek değişiklik = onlarca düzenleme |
-| Tema | Sadece koyu | `prefers-color-scheme` yok |
-| Focus outline | Popup'ta turuncu, HUD'da `#667eea` (mor) | Tutarsız — eski artık kod |
-| Yarıçap | 8 / 10 / 12 / 16px karışık | Ölçek yok |
-| Boşluk | 12 / 16 / 24px serbest | Ölçek yok |
-| Font ağırlığı | 200–800 arası rastgele | Tanımlı ramp yok |
-| Buton efekti | Kayan parıltı (`::before`) + `translateY` hover | Tarihli hisseder |
-| Kapat butonu | Ayrı kırmızı gradyan | Sisteme bağlı değil |
+| Color | `#ff6b35 → #f7931e` gradient hand-written in ~15 places | No tokens; a single change = dozens of edits |
+| Theme | Dark only | No `prefers-color-scheme` |
+| Focus outline | Orange in the popup, `#667eea` (purple) in the HUD | Inconsistent — leftover legacy code |
+| Radius | Mixed 8 / 10 / 12 / 16px | No scale |
+| Spacing | Freeform 12 / 16 / 24px | No scale |
+| Font weight | Random between 200–800 | No defined ramp |
+| Button effect | Sliding shimmer (`::before`) + `translateY` hover | Feels dated |
+| Close button | Separate red gradient | Not tied to the system |
 
-Bunların hepsi bu çalışmada token sistemine bağlanacak ve düzeltilecek.
+All of these will be connected to the token system and fixed in this effort.
 
 ---
 
-## 3. Token Mimarisi
+## 3. Token Architecture
 
-**İki katmanlı** yapı, tek bir paylaşılan `src/styles/tokens.css` dosyasında:
+A **two-layer** structure, in a single shared `src/styles/tokens.css` file:
 
-### 3a. Primitive (ham) token'lar — tema-bağımsız
-Renk rampaları ve ham ölçekler. Doğrudan komponentlerde KULLANILMAZ, sadece semantik token'ları beslerler.
+### 3a. Primitive (raw) tokens — theme-independent
+Color ramps and raw scales. NOT used directly in components; they only feed the semantic tokens.
 
 ```css
 :root {
-  /* Marka turuncusu (tek, rafine ton + varyantlar) */
+  /* Brand orange (single, refined tone + variants) */
   --orange-400: #ff8551;
-  --orange-500: #ff6b35;   /* birincil vurgu */
-  --orange-600: #ef5a1f;   /* hover/basılı */
-  --orange-050: #fff1ea;   /* açık temada zemin tonu */
+  --orange-500: #ff6b35;   /* primary accent */
+  --orange-600: #ef5a1f;   /* hover/pressed */
+  --orange-050: #fff1ea;   /* background tone in light theme */
 
-  /* Nötrler — saf siyah değil, hafif sıcak */
+  /* Neutrals — not pure black, slightly warm */
   --neutral-950: #14110f;
   --neutral-900: #1c1917;
   --neutral-800: #292524;
@@ -68,18 +68,18 @@ Renk rampaları ve ham ölçekler. Doğrudan komponentlerde KULLANILMAZ, sadece 
   --neutral-100: #f5f4f2;
   --neutral-000: #ffffff;
 
-  /* Durum renkleri */
-  --red-500: #ef4444;      /* kapat / hata */
-  --green-500: #22c55e;    /* tamamlandı */
+  /* Status colors */
+  --red-500: #ef4444;      /* close / error */
+  --green-500: #22c55e;    /* completed */
 }
 ```
 
-### 3b. Semantik token'lar — temaya göre eşlenir
-Komponentler SADECE bunları kullanır. Koyu varsayılan, açık `@media` ile.
+### 3b. Semantic tokens — mapped per theme
+Components use ONLY these. Dark is the default; light via `@media`.
 
 ```css
 :root {
-  /* Koyu (varsayılan) */
+  /* Dark (default) */
   --surface:        var(--neutral-950);
   --surface-raised: var(--neutral-900);
   --surface-overlay: rgba(28, 25, 23, 0.72); /* glass panel */
@@ -87,7 +87,7 @@ Komponentler SADECE bunları kullanır. Koyu varsayılan, açık `@media` ile.
   --border-strong:  rgba(255, 255, 255, 0.16);
   --text:           var(--neutral-000);
   --text-muted:     var(--neutral-400);
-  --text-faint:     rgba(255, 255, 255, 0.32); /* bağlam kelimeleri */
+  --text-faint:     rgba(255, 255, 255, 0.32); /* context words */
   --accent:         var(--orange-500);
   --accent-hover:   var(--orange-400);
   --accent-text:    #ffffff;
@@ -95,13 +95,13 @@ Komponentler SADECE bunları kullanır. Koyu varsayılan, açık `@media` ile.
   --danger:         var(--red-500);
 }
 
-/* Açık palet — tek yerde tanımlanır, aşağıdaki üç seçici de bunu kullanır */
+/* Light palette — defined in one place; the three selectors below all use it */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) { /* açık değerler */ }
+  :root:not([data-theme="dark"]) { /* light values */ }
 }
-:root[data-theme="light"] { /* açık değerler */ }
+:root[data-theme="light"] { /* light values */ }
 
-/* Açık değerler (yukarıdaki iki seçicide aynen kullanılır) */
+/* Light values (used verbatim in the two selectors above) */
 /*
   --surface: var(--neutral-100);  --surface-raised: var(--neutral-000);
   --surface-overlay: rgba(255,255,255,.78);
@@ -114,152 +114,152 @@ Komponentler SADECE bunları kullanır. Koyu varsayılan, açık `@media` ile.
 */
 ```
 
-### 3c. Manuel tema override (KESİNLEŞTİ)
-Kullanıcı Ayarlar'dan **Koyu / Açık / Sistem** seçebilir. Mekanizma:
+### 3c. Manual theme override (FINALIZED)
+The user can choose **Dark / Light / System** from Settings. Mechanism:
 
-- Varsayılan = **Sistem**: hiçbir attribute yok → `prefers-color-scheme` geçerli.
-- **Koyu** seçilince: `<html data-theme="dark">` → koyu değerler her koşulda kazanır.
-- **Açık** seçilince: `<html data-theme="light">` → açık değerler her koşulda kazanır.
-- Seçim `chrome.storage.local` içinde saklanır; popup ve ayarlar bu attribute'u `<html>`'e uygular.
+- Default = **System**: no attribute → `prefers-color-scheme` applies.
+- When **Dark** is chosen: `<html data-theme="dark">` → dark values win under all conditions.
+- When **Light** is chosen: `<html data-theme="light">` → light values win under all conditions.
+- The choice is stored in `chrome.storage.local`; the popup and settings apply this attribute to `<html>`.
 
-> **HUD her zaman koyu (KESİNLEŞTİ).** HUD, kullanıcının sayfası üzerine bindirilen ayrı bir iframe olduğundan okuma odağı için tema seçiminden **bağımsız**, sabit koyu paletle çalışır. HUD kökü `data-theme="dark"` sabitlenir; `prefers-color-scheme`'e tepki vermez.
+> **HUD is always dark (FINALIZED).** Because the HUD is a separate iframe overlaid on the user's page, it operates with a fixed dark palette for reading focus, **independent** of the theme choice. The HUD root is pinned to `data-theme="dark"`; it does not respond to `prefers-color-scheme`.
 
 ---
 
-## 4. Ölçekler
+## 4. Scales
 
-### Tipografi
-Font: **Inter** (mevcut), fallback `"Segoe UI", -apple-system, sans-serif`. Ağırlıklar **400 / 500 / 600 / 700** ile sınırlı (rastgele 200/800 kaldırılır).
+### Typography
+Font: **Inter** (existing), fallback `"Segoe UI", -apple-system, sans-serif`. Weights limited to **400 / 500 / 600 / 700** (random 200/800 are removed).
 
-| Token | Boyut | Kullanım |
+| Token | Size | Usage |
 |-------|-------|----------|
-| `--font-display` | `clamp(3rem, 11vw, 9rem)` | HUD anlık kelime |
-| `--font-title` | 1.125rem / 600 | Panel başlığı |
-| `--font-body` | 0.875rem / 400 | Metin girişi, gövde |
-| `--font-label` | 0.75rem / 500 | Etiketler, slider label |
-| `--font-caption` | 0.6875rem / 400 | Alt bilgi, kredi |
+| `--font-display` | `clamp(3rem, 11vw, 9rem)` | HUD current word |
+| `--font-title` | 1.125rem / 600 | Panel title |
+| `--font-body` | 0.875rem / 400 | Text input, body |
+| `--font-label` | 0.75rem / 500 | Labels, slider label |
+| `--font-caption` | 0.6875rem / 400 | Footer, credit |
 
-### Boşluk (4 tabanlı)
+### Spacing (4-based)
 `--space-1:4px` · `--space-2:8px` · `--space-3:12px` · `--space-4:16px` · `--space-6:24px` · `--space-8:32px`
 
-### Yarıçap
+### Radius
 `--radius-sm:8px` · `--radius-md:12px` · `--radius-lg:16px` · `--radius-full:999px`
-(Karışık 10px değeri kaldırılır.)
+(The odd 10px value is removed.)
 
-### Elevation / Glass (2 seviye)
-Shimmer efekti **tamamen kaldırılır**. Blur korunur ama standardize + hafifletilir.
+### Elevation / Glass (2 levels)
+The shimmer effect is **removed entirely**. Blur is kept but standardized + lightened.
 
 ```css
 --elevation-1: 0 1px 2px rgba(0,0,0,.2), 0 2px 8px rgba(0,0,0,.24);
 --elevation-2: 0 4px 16px rgba(0,0,0,.32);
---blur-panel: blur(12px);        /* eskiden 8–20px karışıktı */
---accent-glow: 0 0 0 3px rgba(255,107,53,.24); /* focus/hover ışıması */
+--blur-panel: blur(12px);        /* previously a mix of 8–20px */
+--accent-glow: 0 0 0 3px rgba(255,107,53,.24); /* focus/hover glow */
 ```
 
-### Hareket
+### Motion
 ```css
 --ease-out: cubic-bezier(.2, 0, 0, 1);
 --dur-fast: 120ms;
 --dur-base: 200ms;
 ```
-`translateY(-2/-3px)` hover sıçramaları yerine **hafif `scale(1.02)` + gölge** ve renk geçişi. `@media (prefers-reduced-motion: reduce)` altında tüm transition/animation kapatılır.
+Instead of `translateY(-2/-3px)` hover jumps, use a **subtle `scale(1.02)` + shadow** and a color transition. Under `@media (prefers-reduced-motion: reduce)` all transitions/animations are disabled.
 
 ---
 
-## 5. Komponent Envanteri
+## 5. Component Inventory
 
-Tüm yüzeylerde paylaşılacak komponentler (hepsi semantik token kullanır):
+Components to be shared across all surfaces (all use semantic tokens):
 
-- **Button** — `primary` (dolu accent), `secondary` (border + şeffaf), `ghost` (sadece metin), `icon` (kare/yuvarlak). Uppercase + letter-spacing kaldırılır; normal case, daha okunur.
-- **IconButton / CloseButton** — nötr yüzey + hover'da `--danger` (ayrı gradyan yerine sistemden).
-- **Slider (range)** — thumb accent, track `--border`; tek stil, WebKit + Firefox.
-- **Progress** — ince, accent dolgu; parlama token'dan.
-- **TextInput / Textarea** — `--surface-raised` zemin, `--border`, focus'ta `--accent-glow`.
-- **Toggle / Switch** — YENİ (ayarlar için).
-- **Segmented control** — YENİ (tema: Koyu/Açık/Sistem seçimi ve font seçimi için).
-- **Kbd chip** — nötr yüzey (turuncu yerine `--surface-raised` + `--border`); kısayol rozetleri.
-- **Panel / Card** — glass yüzey, `--elevation`, `--radius-lg`.
-- **Selection FAB** — content script seçim ikonu; rafine, tek boyut, tutarlı gölge.
-
----
-
-## 6. Yüzey 1 — Popup
-
-Mevcut yapı korunur (başlık / textarea / aksiyonlar / kredi), token'lara taşınır.
-
-Değişiklikler:
-- Genişlik 400px kalır; iç boşluklar `--space` ölçeğine oturur.
-- Başlıktaki gradyanlı metin **sade `--accent` renk** olur (KESİNLEŞTİ — gradyan hero yok).
-- Butonlar yeni Button komponenti; uppercase kalkar.
-- **Yeni:** sağ üstte küçük bir **ayarlar (⚙) ikon butonu** → popup içinde Ayarlar görünümüne geçer.
-- Tema: seçime göre (Koyu/Açık/Sistem); Sistem'de otomatik.
+- **Button** — `primary` (solid accent), `secondary` (border + transparent), `ghost` (text only), `icon` (square/round). Uppercase + letter-spacing removed; normal case, more readable.
+- **IconButton / CloseButton** — neutral surface + `--danger` on hover (from the system, instead of a separate gradient).
+- **Slider (range)** — accent thumb, `--border` track; a single style, WebKit + Firefox.
+- **Progress** — thin, accent fill; glow from a token.
+- **TextInput / Textarea** — `--surface-raised` background, `--border`, `--accent-glow` on focus.
+- **Toggle / Switch** — NEW (for settings).
+- **Segmented control** — NEW (for the theme: Dark/Light/System selection and font selection).
+- **Kbd chip** — neutral surface (`--surface-raised` + `--border` instead of orange); shortcut badges.
+- **Panel / Card** — glass surface, `--elevation`, `--radius-lg`.
+- **Selection FAB** — content-script selection icon; refined, single size, consistent shadow.
 
 ---
 
-## 7. Yüzey 2 — HUD (okuma ekranı) + UX İyileştirmeleri
+## 6. Surface 1 — Popup
 
-Sadece stil değil, okuma deneyimi de gelişir:
+The existing structure is kept (title / textarea / actions / credit) and moved onto tokens.
 
-- **ORP odak çizgisi:** anlık kelimenin ortasında sabit dikey bir hizalama kılavuzu; kelimeler bu eksene göre hizalanır (klasik RSVP odak noktası). Vurgulanan orta karakter `--accent`.
-- **Sakin bağlam:** önceki/sonraki kelimeler `--text-faint`; okunmuş/okunmamış önizleme panelleri daha az göze batan, tek tutarlı stil.
-- **Kontrol paneli:** üstte yüzen glass panel; hafifletilmiş blur + `--elevation-2`. Hız, ilerleme, oynat/duraklat/sıfırla.
-- **İlerleme + kalan süre:** `x / y kelime` yanında tahmini kalan süre (WPM'den hesaplanır).
-- **Kısayol ipuçları:** sağ altta; `--kbd` rozetleri nötrleşir, kapatılabilir/soluk.
-- **Kapat:** IconButton, hover'da `--danger`.
-- HUD **her zaman koyu** (tema seçiminden bağımsız — bkz. Bölüm 3c).
-
----
-
-## 8. Yüzey 3 — Ayarlar Paneli (YENİ)
-
-**Popup içinde geçişli görünüm** (KESİNLEŞTİ — ayrı pencere yok). ⚙ ikonuna basınca popup, giriş görünümünden ayarlar görünümüne yumuşak geçer; üstte geri (←) oku. `chrome.storage.local` ile kalıcı. Minimum, gerçekten değerli tercihler (YAGNI):
-
-- **Varsayılan okuma hızı** (WPM) — slider. HUD açılışta bunu kullanır.
-- **Tema** — Segmented: **Koyu / Açık / Sistem** (KESİNLEŞTİ). Seçim `<html data-theme>`'e uygulanır (bkz. 3c); popup + ayarlar yüzeyini etkiler, HUD hariç.
-- **ORP odak çizgisi** — Toggle (aç/kapa).
-- **Bağlam kelimeleri** — Toggle (önceki/sonraki kelimeleri göster/gizle).
-
-Ayarlar durumu tek bir `settings` nesnesinde tutulur (`{ defaultWpm, theme, orp, contextWords }`); popup açılışında ve HUD başlangıcında okunur.
+Changes:
+- Width stays at 400px; inner spacing snaps to the `--space` scale.
+- The gradient text in the title becomes a **plain `--accent` color** (FINALIZED — no gradient hero).
+- Buttons use the new Button component; uppercase is dropped.
+- **New:** a small **settings (⚙) icon button** in the top right → switches to the Settings view inside the popup.
+- Theme: per the choice (Dark/Light/System); automatic in System.
 
 ---
 
-## 9. Erişilebilirlik
+## 7. Surface 2 — HUD (reading screen) + UX Improvements
 
-- Tüm metin/zemin çiftleri WCAG **AA** (normal metin ≥ 4.5:1, büyük metin ≥ 3:1). Açık temada accent `--orange-600`'a kaydırıldı çünkü `#ff6b35` beyaz üzerinde AA'yı geçmiyor.
-- Görünür `:focus-visible` halkası (`--accent-glow`), tek tutarlı stil — mevcut `#667eea` hatası düzeltilir.
-- `prefers-reduced-motion` ve `prefers-contrast: high` desteklenir.
-- Klavye: Space/R/Esc korunur; tüm interaktif öğeler tab-erişilebilir.
+Not just styling — the reading experience improves too:
+
+- **ORP focus line:** a fixed vertical alignment guide at the center of the current word; words align to this axis (the classic RSVP focus point). The highlighted center character is `--accent`.
+- **Calm context:** previous/next words in `--text-faint`; the read/unread preview panels are less obtrusive, with a single consistent style.
+- **Control panel:** a floating glass panel at the top; lightened blur + `--elevation-2`. Speed, progress, play/pause/reset.
+- **Progress + remaining time:** next to `x / y words`, an estimated remaining time (computed from WPM).
+- **Shortcut hints:** at the bottom right; `--kbd` badges go neutral, dismissible/dimmed.
+- **Close:** IconButton, `--danger` on hover.
+- The HUD is **always dark** (independent of the theme choice — see Section 3c).
 
 ---
 
-## 10. Dosya Yapısı ve Migrasyon
+## 8. Surface 3 — Settings Panel (NEW)
+
+**An in-popup transitional view** (FINALIZED — no separate window). Pressing the ⚙ icon smoothly transitions the popup from the entry view to the settings view; a back (←) arrow at the top. Persisted via `chrome.storage.local`. Minimal, genuinely valuable preferences (YAGNI):
+
+- **Default reading speed** (WPM) — slider. The HUD uses this on open.
+- **Theme** — Segmented: **Dark / Light / System** (FINALIZED). The choice is applied to `<html data-theme>` (see 3c); it affects the popup + settings surface, except the HUD.
+- **ORP focus line** — Toggle (on/off).
+- **Context words** — Toggle (show/hide previous/next words).
+
+Settings state is kept in a single `settings` object (`{ defaultWpm, theme, orp, contextWords }`); read on popup open and at HUD start.
+
+---
+
+## 9. Accessibility
+
+- All text/background pairs are WCAG **AA** (normal text ≥ 4.5:1, large text ≥ 3:1). In the light theme the accent is shifted to `--orange-600` because `#ff6b35` does not pass AA on white.
+- A visible `:focus-visible` ring (`--accent-glow`), a single consistent style — the existing `#667eea` bug is fixed.
+- `prefers-reduced-motion` and `prefers-contrast: high` are supported.
+- Keyboard: Space/R/Esc are preserved; all interactive elements are tab-accessible.
+
+---
+
+## 10. File Structure and Migration
 
 ```
 src/styles/
-  tokens.css      # YENİ — primitive + semantik token'lar (tek kaynak)
-  base.css        # YENİ — reset, tipografi ramp, ortak yardımcılar
-  components.css  # YENİ — Button, Slider, Toggle, Kbd, Panel...
-  content.css     # Selection FAB + iframe (token'lara taşınır)
-  hud.css         # (styles.css yeniden adlandırılır) HUD'a özel
-  popup.css       # popup + ayarlar görünümü (token'lara taşınır)
+  tokens.css      # NEW — primitive + semantic tokens (single source)
+  base.css        # NEW — reset, typography ramp, shared helpers
+  components.css  # NEW — Button, Slider, Toggle, Kbd, Panel...
+  content.css     # Selection FAB + iframe (moved onto tokens)
+  hud.css         # (styles.css renamed) HUD-specific
+  popup.css       # popup + settings view (moved onto tokens)
 ```
 
-Migrasyon prensibi: her sabit renk/boşluk/yarıçap değeri karşılık gelen token ile değiştirilir; `popup.js` içindeki inline stiller (hata bildirimi) token'lı bir sınıfa taşınır.
+Migration principle: every fixed color/spacing/radius value is replaced with its corresponding token; the inline styles in `popup.js` (error notification) are moved to a tokenized class.
 
 ---
 
-## 11. Kapsam Dışı (YAGNI)
+## 11. Out of Scope (YAGNI)
 
-- Onboarding / tanıtım ekranı (bu versiyonda yok).
-- Tam görsel yeniden tasarım / yeni marka paleti.
-- Font seçenekleri kütüphanesi (Inter yeterli; istenirse ileride).
-- Kelime öbekleme (chunk / birden fazla kelime) — okuma motoru değişikliği, ayrı iş.
+- Onboarding / intro screen (not in this version).
+- Full visual redesign / new brand palette.
+- Font options library (Inter is enough; later if requested).
+- Word chunking (chunk / multiple words) — a reading-engine change, a separate effort.
 
 ---
 
-## 12. Kararlar (kesinleşti)
+## 12. Decisions (finalized)
 
-1. **Popup başlığı:** sade `--accent` renk (gradyan hero yok).
-2. **HUD teması:** her zaman koyu, tema seçiminden bağımsız.
-3. **Ayarlar:** popup içi geçişli görünüm (ayrı pencere yok).
-4. **Tema kontrolü:** Ayarlar'da Koyu / Açık / Sistem seçimi; varsayılan Sistem (otomatik).
+1. **Popup title:** plain `--accent` color (no gradient hero).
+2. **HUD theme:** always dark, independent of the theme choice.
+3. **Settings:** in-popup transitional view (no separate window).
+4. **Theme control:** Dark / Light / System selection in Settings; default System (automatic).

@@ -32,7 +32,7 @@ window.addEventListener("message", async (event) => {
     words = splitWords(event.data.text);
     index = 0;
     updateAll();
-    el.currentWord.textContent = "Başlamaya hazır...";
+    el.currentWord.textContent = "Ready to start...";
     el.prevWord.textContent = ""; el.nextWord.textContent = "";
   }
 });
@@ -47,12 +47,12 @@ el.speed.addEventListener("input", (e) => {
 el.startBtn.addEventListener("click", () => {
   if (!words.length) return;
   isReading = true; paused = false;
-  el.startBtn.disabled = true; el.pauseBtn.disabled = false; el.pauseBtn.textContent = "Duraklat";
+  el.startBtn.disabled = true; el.pauseBtn.disabled = false; el.pauseBtn.textContent = "Pause";
   startReading();
 });
 el.pauseBtn.addEventListener("click", () => {
-  if (paused) { paused = false; el.pauseBtn.textContent = "Duraklat"; startReading(); }
-  else { paused = true; el.pauseBtn.textContent = "Devam"; clearInterval(interval); }
+  if (paused) { paused = false; el.pauseBtn.textContent = "Pause"; startReading(); }
+  else { paused = true; el.pauseBtn.textContent = "Resume"; clearInterval(interval); }
 });
 el.resetBtn.addEventListener("click", resetReader);
 el.closeBtn.addEventListener("click", () => {
@@ -73,8 +73,8 @@ function startReading() {
     if (paused) return;
     if (index >= words.length) {
       clearInterval(interval); isReading = false;
-      el.startBtn.disabled = false; el.pauseBtn.disabled = true; el.pauseBtn.textContent = "Duraklat";
-      el.currentWord.textContent = "Okuma tamamlandı!";
+      el.startBtn.disabled = false; el.pauseBtn.disabled = true; el.pauseBtn.textContent = "Pause";
+      el.currentWord.textContent = "Reading complete!";
       el.prevWord.textContent = ""; el.nextWord.textContent = "";
       return;
     }
@@ -92,17 +92,25 @@ function showWord(word) {
   el.currentWord.classList.toggle("long-word", isLong);
   el.prevWord.classList.toggle("long-word", prev.length > 12);
   el.nextWord.classList.toggle("long-word", next.length > 12);
-  updateTextPreview();
 }
 
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, (ch) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]
+  ));
+}
+
+// Splits the word around its Optimal Recognition Point (single pivot letter) so
+// the pivot can be pinned to a fixed on-screen focus point via CSS grid.
 function formatWordWithCenterHighlight(word) {
-  if (!word) return word;
+  if (!word) return "";
   const mid = orpIndex(word.length);
-  const isEven = word.length > 1 && word.length % 2 === 0;
-  return word.split("").map((ch, i) => {
-    if (i === mid || (isEven && i === mid + 1)) return `<span class="center-char">${ch}</span>`;
-    return ch;
-  }).join("");
+  const before = escapeHtml(word.slice(0, mid));
+  const pivot = escapeHtml(word.charAt(mid));
+  const after = escapeHtml(word.slice(mid + 1));
+  return `<span class="rsvp-before">${before}</span>`
+    + `<span class="center-char">${pivot}</span>`
+    + `<span class="rsvp-after">${after}</span>`;
 }
 
 function updateAll() { updateWordCount(); updateProgress(); updateRemaining(); updateTextPreview(); }
@@ -122,9 +130,9 @@ function updateTextPreview() {
 
 function resetReader() {
   clearInterval(interval); index = 0; isReading = false; paused = false;
-  el.startBtn.disabled = false; el.pauseBtn.disabled = true; el.pauseBtn.textContent = "Duraklat";
+  el.startBtn.disabled = false; el.pauseBtn.disabled = true; el.pauseBtn.textContent = "Pause";
   updateAll();
-  el.currentWord.textContent = "Başlamaya hazır..."; el.currentWord.classList.remove("long-word");
+  el.currentWord.textContent = "Ready to start..."; el.currentWord.classList.remove("long-word");
   el.prevWord.textContent = ""; el.nextWord.textContent = "";
   el.prevWord.classList.remove("long-word"); el.nextWord.classList.remove("long-word");
 }

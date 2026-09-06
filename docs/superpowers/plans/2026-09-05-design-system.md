@@ -2,65 +2,65 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Mevcut koyu+turuncu kimliği koruyup olgunlaştıran, token tabanlı bir design system kurmak; 3 yüzeyi (popup, HUD, seçim ikonu) yenilemek; popup içine ayarlar görünümü ve HUD'a okuma UX iyileştirmeleri eklemek.
+**Goal:** Build a token-based design system that preserves and matures the existing dark+orange identity; refresh the 3 surfaces (popup, HUD, selection icon); add a settings view inside the popup and reading-UX improvements to the HUD.
 
-**Architecture:** Tüm görsel değerler tek bir `tokens.css` içindeki iki katmanlı token setinden (primitive → semantik) gelir. Semantik token'lar koyu (varsayılan) + açık temaya `prefers-color-scheme` ve `<html data-theme>` override'ı ile eşlenir. Saf mantık (tema çözümleme, kalan süre, kelime bölme, ORP) `src/shared/settings.js` içinde chrome-bağımsız ES modülüne çıkarılır ve `node --test` ile birim testi yapılır; CSS/DOM işleri Chrome'da manuel doğrulanır.
+**Architecture:** All visual values come from a two-layer token set (primitive → semantic) inside a single `tokens.css`. The semantic tokens are mapped to a dark (default) + light theme via `prefers-color-scheme` and a `<html data-theme>` override. Pure logic (theme resolution, remaining time, word splitting, ORP) is extracted into a Chrome-independent ES module in `src/shared/settings.js` and unit-tested with `node --test`; CSS/DOM work is verified manually in Chrome.
 
-**Tech Stack:** Vanilla JS (ES modules), CSS custom properties, Chrome Extension MV3, `chrome.storage.local`, Node.js built-in test runner (`node --test`, sıfır bağımlılık).
+**Tech Stack:** Vanilla JS (ES modules), CSS custom properties, Chrome Extension MV3, `chrome.storage.local`, Node.js built-in test runner (`node --test`, zero dependencies).
 
 ## Global Constraints
 
-- Manifest V3; harici build/bundler yok — dosyalar doğrudan yüklenir.
-- Yeni npm runtime bağımlılığı YOK. Test için yalnızca Node built-in `node:test` + `node:assert`.
-- Komponentler SADECE semantik token kullanır; ham renk/px değeri elle yazılmaz.
-- HUD her zaman koyu (tema seçiminden bağımsız).
-- Erişilebilirlik: WCAG AA kontrast, tek tutarlı `:focus-visible` halkası, `prefers-reduced-motion` + `prefers-contrast: high` desteği.
-- Spec: `docs/superpowers/specs/2026-09-05-design-system-design.md` (bu planın tek doğruluk kaynağı).
-- Font: Inter, ağırlıklar 400/500/600/700 ile sınırlı.
+- Manifest V3; no external build/bundler — files are loaded directly.
+- NO new npm runtime dependency. For testing, only Node's built-in `node:test` + `node:assert`.
+- Components use ONLY semantic tokens; raw color/px values are never hand-written.
+- The HUD is always dark (independent of the theme selection).
+- Accessibility: WCAG AA contrast, a single consistent `:focus-visible` ring, `prefers-reduced-motion` + `prefers-contrast: high` support.
+- Spec: `docs/superpowers/specs/2026-09-05-design-system-design.md` (the single source of truth for this plan).
+- Font: Inter, limited to weights 400/500/600/700.
 
 ---
 
-## Dosya Yapısı
+## File Structure
 
-**Oluşturulacak:**
-- `package.json` — kök; sadece `{"type":"module"}` (Node'un `.js`'i ESM okuması için; Chrome bunu okumaz).
-- `src/styles/tokens.css` — primitive + semantik token'lar, tema override, motion token'ları.
-- `src/styles/base.css` — reset, tipografi rampı, `:focus-visible`, scrollbar, reduced-motion.
+**To create:**
+- `package.json` — root; just `{"type":"module"}` (so Node reads `.js` as ESM; Chrome does not read this).
+- `src/styles/tokens.css` — primitive + semantic tokens, theme override, motion tokens.
+- `src/styles/base.css` — reset, typography ramp, `:focus-visible`, scrollbar, reduced-motion.
 - `src/styles/components.css` — Button, IconButton, Slider, Progress, Input, Toggle, Segmented, Kbd, Panel.
-- `src/shared/settings.js` — saf yardımcılar (ES module): `DEFAULT_SETTINGS`, `resolveTheme`, `estimateRemainingMs`, `formatDuration`, `splitWords`, `orpIndex`.
-- `test/settings.test.js` — `node --test` birim testleri.
+- `src/shared/settings.js` — pure helpers (ES module): `DEFAULT_SETTINGS`, `resolveTheme`, `estimateRemainingMs`, `formatDuration`, `splitWords`, `orpIndex`.
+- `test/settings.test.js` — `node --test` unit tests.
 
-**Değiştirilecek:**
-- `src/popup/popup.html` — ayarlar (⚙) butonu + ayarlar görünümü; token/base/components css bağlantıları.
-- `src/popup/popup.css` — token'lara taşınır; ayarlar görünümü stilleri.
-- `src/popup/popup.js` — `type="module"`; ayarlar depolama, tema uygulama, görünüm geçişi.
-- `src/hud/hud.html` — ORP çizgisi + kalan süre elemanları; token/base/components + hud.css.
-- `src/hud/hud.js` — `type="module"`; ayarları oku, ORP/bağlam toggle, kalan süre, defaultWpm.
-- `src/styles/content.css` — Selection FAB + iframe token'lara taşınır.
-- `manifest.json` — version 3.0.0; `web_accessible_resources`'a yeni css + `src/shared/settings.js` + `hud.css`.
-- `README.md` — sürüm geçmişi v3.0.
+**To modify:**
+- `src/popup/popup.html` — settings (⚙) button + settings view; token/base/components css links.
+- `src/popup/popup.css` — moved to tokens; settings view styles.
+- `src/popup/popup.js` — `type="module"`; settings storage, theme application, view switching.
+- `src/hud/hud.html` — ORP line + remaining-time elements; token/base/components + hud.css.
+- `src/hud/hud.js` — `type="module"`; read settings, ORP/context toggle, remaining time, defaultWpm.
+- `src/styles/content.css` — Selection FAB + iframe moved to tokens.
+- `manifest.json` — version 3.0.0; add the new css + `src/shared/settings.js` + `hud.css` to `web_accessible_resources`.
+- `README.md` — version history v3.0.
 
-**Yeniden adlandırılacak:**
-- `src/styles/styles.css` → `src/styles/hud.css` (HUD'a özel; token'lara taşınır, always-dark).
+**To rename:**
+- `src/styles/styles.css` → `src/styles/hud.css` (HUD-specific; moved to tokens, always-dark).
 
 ---
 
 ### Task 1: Token & base foundation
 
-Design system'in çekirdeği. Bundan sonraki her task bu token'ları kullanır.
+The core of the design system. Every subsequent task uses these tokens.
 
 **Files:**
 - Create: `src/styles/tokens.css`
 - Create: `src/styles/base.css`
-- Modify: `src/popup/popup.html` (yalnızca `<head>` link'leri — geçici doğrulama için)
+- Modify: `src/popup/popup.html` (only the `<head>` links — for temporary verification)
 
 **Interfaces:**
-- Produces: semantik CSS değişkenleri — `--surface`, `--surface-raised`, `--surface-overlay`, `--border`, `--border-strong`, `--text`, `--text-muted`, `--text-faint`, `--accent`, `--accent-hover`, `--accent-text`, `--focus-ring`, `--danger`, `--danger-hover`, `--success`; ölçek token'ları — `--space-1..8`, `--radius-sm/md/lg/full`, `--font-display/title/body/label/caption`, `--fw-regular/medium/semibold/bold`, `--elevation-1/2`, `--blur-panel`, `--accent-glow`, `--ease-out`, `--dur-fast/base`. Tema override: `<html data-theme="light|dark">`.
+- Produces: semantic CSS variables — `--surface`, `--surface-raised`, `--surface-overlay`, `--border`, `--border-strong`, `--text`, `--text-muted`, `--text-faint`, `--accent`, `--accent-hover`, `--accent-text`, `--focus-ring`, `--danger`, `--danger-hover`, `--success`; scale tokens — `--space-1..8`, `--radius-sm/md/lg/full`, `--font-display/title/body/label/caption`, `--fw-regular/medium/semibold/bold`, `--elevation-1/2`, `--blur-panel`, `--accent-glow`, `--ease-out`, `--dur-fast/base`. Theme override: `<html data-theme="light|dark">`.
 
-- [ ] **Step 1: `src/styles/tokens.css` dosyasını oluştur**
+- [ ] **Step 1: Create the `src/styles/tokens.css` file**
 
 ```css
-/* ============ PRIMITIVE (tema-bağımsız ham değerler) ============ */
+/* ============ PRIMITIVE (theme-independent raw values) ============ */
 :root {
   --orange-050: #fff1ea;
   --orange-400: #ff8551;
@@ -80,7 +80,7 @@ Design system'in çekirdeği. Bundan sonraki her task bu token'ları kullanır.
   --red-600: #dc2626;
   --green-500: #22c55e;
 
-  /* Ölçekler */
+  /* Scales */
   --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
   --space-6: 24px; --space-8: 32px;
   --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-full: 999px;
@@ -97,7 +97,7 @@ Design system'in çekirdeği. Bundan sonraki her task bu token'ları kullanır.
   --dur-fast: 120ms; --dur-base: 200ms;
 }
 
-/* ============ SEMANTİK — KOYU (varsayılan) ============ */
+/* ============ SEMANTIC — DARK (default) ============ */
 :root {
   --surface: var(--neutral-950);
   --surface-raised: var(--neutral-900);
@@ -119,8 +119,8 @@ Design system'in çekirdeği. Bundan sonraki her task bu token'ları kullanır.
   --accent-glow: 0 0 0 3px rgba(255,107,53,.24);
 }
 
-/* ============ SEMANTİK — AÇIK ============ */
-/* Sistem açık VE kullanıcı koyu'ya zorlamadıysa */
+/* ============ SEMANTIC — LIGHT ============ */
+/* System is light AND the user has not forced dark */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --surface: var(--neutral-100);
@@ -139,7 +139,7 @@ Design system'in çekirdeği. Bundan sonraki her task bu token'ları kullanır.
     --elevation-2: 0 4px 16px rgba(0,0,0,.12);
   }
 }
-/* Kullanıcı açık'a zorladıysa (sistem ne olursa olsun) */
+/* User forced light (regardless of system) */
 :root[data-theme="light"] {
   --surface: var(--neutral-100);
   --surface-raised: var(--neutral-000);
@@ -158,7 +158,7 @@ Design system'in çekirdeği. Bundan sonraki her task bu token'ları kullanır.
 }
 ```
 
-- [ ] **Step 2: `src/styles/base.css` dosyasını oluştur**
+- [ ] **Step 2: Create the `src/styles/base.css` file**
 
 ```css
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -170,7 +170,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Tek tutarlı focus halkası (eski #667eea hatasının yerine) */
+/* Single consistent focus ring (replacing the old #667eea bug) */
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
@@ -194,25 +194,25 @@ body {
 }
 ```
 
-- [ ] **Step 3: `src/popup/popup.html` `<head>`'ine token + base bağla (mevcut popup.css'ten ÖNCE)**
+- [ ] **Step 3: Link token + base into `src/popup/popup.html` `<head>` (BEFORE the existing popup.css)**
 
-`<link rel="stylesheet" href="popup.css" />` satırının ÖNÜNE ekle:
+Add BEFORE the `<link rel="stylesheet" href="popup.css" />` line:
 
 ```html
     <link rel="stylesheet" href="../styles/tokens.css" />
     <link rel="stylesheet" href="../styles/base.css" />
 ```
 
-- [ ] **Step 4: Chrome'da doğrula (koyu/açık override)**
+- [ ] **Step 4: Verify in Chrome (dark/light override)**
 
-1. `chrome://extensions` → Developer mode → "Load unpacked" → repo klasörü.
-2. Popup'ı aç. DevTools console'da çalıştır:
+1. `chrome://extensions` → Developer mode → "Load unpacked" → repo folder.
+2. Open the popup. In the DevTools console run:
    `document.documentElement.setAttribute('data-theme','light')`
-   Beklenen: zemin açık renge döner (`--surface` = `#f5f4f2`).
-   `document.documentElement.setAttribute('data-theme','dark')` → koyu döner.
-   `document.documentElement.removeAttribute('data-theme')` → sistem temasına döner.
+   Expected: the background switches to a light color (`--surface` = `#f5f4f2`).
+   `document.documentElement.setAttribute('data-theme','dark')` → switches to dark.
+   `document.documentElement.removeAttribute('data-theme')` → returns to the system theme.
 
-Expected: Üç durumda da zemin/metin okunur; hata yok. (Mevcut popup.css hâlâ eski sabit renkleri kullandığı için tam stil sonraki task'larda oturacak — burada yalnızca token katmanının çalıştığını doğruluyoruz.)
+Expected: In all three cases the background/text are legible; no errors. (Since the current popup.css still uses the old fixed colors, full styling will settle in later tasks — here we only verify that the token layer works.)
 
 - [ ] **Step 5: Commit**
 
@@ -225,7 +225,7 @@ git commit -m "feat(design-system): add token foundation and base styles"
 
 ### Task 2: Shared settings helpers (TDD)
 
-Chrome-bağımsız saf mantık. Gerçek birim testleriyle.
+Chrome-independent pure logic. With real unit tests.
 
 **Files:**
 - Create: `package.json`
@@ -235,13 +235,13 @@ Chrome-bağımsız saf mantık. Gerçek birim testleriyle.
 **Interfaces:**
 - Produces:
   - `DEFAULT_SETTINGS = { defaultWpm: 250, theme: "system", orp: true, contextWords: true }`
-  - `resolveTheme(theme)` → `"light" | "dark" | null` — `"system"` için `null` (attribute silinir), aksi halde aynen döner.
-  - `splitWords(text)` → `string[]` (boşluklara böl, boşları at).
-  - `estimateRemainingMs(wordsLeft, wpm)` → `number` (ms). `wpm<=0` ise `0`.
-  - `formatDuration(ms)` → `string` (`"0:47"`, `"1:05"`, `"12:03"` biçimi).
-  - `orpIndex(len)` → `number` — kelime uzunluğuna göre vurgulanacak karakter indeksi (RSVP odak noktası).
+  - `resolveTheme(theme)` → `"light" | "dark" | null` — `null` for `"system"` (attribute is removed), otherwise returned as-is.
+  - `splitWords(text)` → `string[]` (split on whitespace, drop empties).
+  - `estimateRemainingMs(wordsLeft, wpm)` → `number` (ms). `0` if `wpm<=0`.
+  - `formatDuration(ms)` → `string` (`"0:47"`, `"1:05"`, `"12:03"` format).
+  - `orpIndex(len)` → `number` — index of the character to emphasize based on word length (RSVP focal point).
 
-- [ ] **Step 1: Failing test yaz — `test/settings.test.js`**
+- [ ] **Step 1: Write a failing test — `test/settings.test.js`**
 
 ```js
 import { test } from "node:test";
@@ -286,12 +286,12 @@ test("orpIndex returns center-ish index", () => {
 });
 ```
 
-- [ ] **Step 2: Testi çalıştır, başarısız olduğunu gör**
+- [ ] **Step 2: Run the test, watch it fail**
 
 Run: `node --test`
 Expected: FAIL — `Cannot find module '../src/shared/settings.js'`.
 
-- [ ] **Step 3: `package.json` oluştur**
+- [ ] **Step 3: Create `package.json`**
 
 ```json
 {
@@ -303,7 +303,7 @@ Expected: FAIL — `Cannot find module '../src/shared/settings.js'`.
 }
 ```
 
-- [ ] **Step 4: `src/shared/settings.js` oluştur (minimal implementasyon)**
+- [ ] **Step 4: Create `src/shared/settings.js` (minimal implementation)**
 
 ```js
 export const DEFAULT_SETTINGS = {
@@ -339,10 +339,10 @@ export function orpIndex(len) {
 }
 ```
 
-- [ ] **Step 5: Testi çalıştır, geçtiğini gör**
+- [ ] **Step 5: Run the test, watch it pass**
 
 Run: `node --test`
-Expected: PASS — 6 test.
+Expected: PASS — 6 tests.
 
 - [ ] **Step 6: Commit**
 
@@ -355,15 +355,15 @@ git commit -m "feat(shared): add tested settings/reader helpers"
 
 ### Task 3: Component library
 
-Tüm yüzeylerin paylaşacağı komponent stilleri. Yalnızca token kullanır.
+Component styles shared by all surfaces. Uses tokens only.
 
 **Files:**
 - Create: `src/styles/components.css`
 
 **Interfaces:**
-- Produces CSS sınıfları: `.btn` + `.btn--primary/.btn--secondary/.btn--ghost`; `.icon-btn` (+ `.icon-btn--danger`); `.slider`; `.progress` + `.progress__fill`; `.field` (input/textarea); `.switch` (+ `input`); `.segmented` + `.segmented__option`; `.kbd`; `.panel`.
+- Produces CSS classes: `.btn` + `.btn--primary/.btn--secondary/.btn--ghost`; `.icon-btn` (+ `.icon-btn--danger`); `.slider`; `.progress` + `.progress__fill`; `.field` (input/textarea); `.switch` (+ `input`); `.segmented` + `.segmented__option`; `.kbd`; `.panel`.
 
-- [ ] **Step 1: `src/styles/components.css` oluştur**
+- [ ] **Step 1: Create `src/styles/components.css`**
 
 ```css
 /* ---- Button ---- */
@@ -489,9 +489,9 @@ Tüm yüzeylerin paylaşacağı komponent stilleri. Yalnızca token kullanır.
 }
 ```
 
-- [ ] **Step 2: Chrome'da görsel doğrulama (geçici sandbox)**
+- [ ] **Step 2: Visual verification in Chrome (temporary sandbox)**
 
-`src/popup/popup.html` `<head>`'ine geçici olarak `<link rel="stylesheet" href="../styles/components.css" />` ekle, `<body>` başına geçici bir test bloğu koy:
+Temporarily add `<link rel="stylesheet" href="../styles/components.css" />` into `src/popup/popup.html` `<head>`, and place a temporary test block at the start of `<body>`:
 
 ```html
 <div style="padding:16px; display:flex; flex-direction:column; gap:12px">
@@ -499,19 +499,19 @@ Tüm yüzeylerin paylaşacağı komponent stilleri. Yalnızca token kullanır.
   <button class="btn btn--secondary">Secondary</button>
   <label class="switch"><input type="checkbox" checked><span class="switch__track"></span></label>
   <div class="segmented">
-    <button class="segmented__option" aria-pressed="true">Koyu</button>
-    <button class="segmented__option">Açık</button>
-    <button class="segmented__option">Sistem</button>
+    <button class="segmented__option" aria-pressed="true">Dark</button>
+    <button class="segmented__option">Light</button>
+    <button class="segmented__option">System</button>
   </div>
   <kbd class="kbd">Space</kbd>
 </div>
 ```
 
-Uzantıyı reload et, popup'ı aç. Beklenen: butonlar, toggle (açık=turuncu, sağda), segmented (seçili=turuncu), kbd doğru görünür; `data-theme` değişince renkler tema ile döner.
+Reload the extension and open the popup. Expected: the buttons, toggle (on=orange, on the right), segmented (selected=orange), and kbd render correctly; when `data-theme` changes, the colors follow the theme.
 
-- [ ] **Step 3: Geçici test bloğunu ve geçici link'i geri al**
+- [ ] **Step 3: Revert the temporary test block and the temporary link**
 
-Step 2'de eklenen geçici `<div>` bloğunu sil. `components.css` link'ini de sil (Task 4'te kalıcı olarak eklenecek). `popup.html` Task 1 sonundaki haline dönsün.
+Delete the temporary `<div>` block added in Step 2. Also delete the `components.css` link (it will be added permanently in Task 4). Return `popup.html` to its state at the end of Task 1.
 
 - [ ] **Step 4: Commit**
 
@@ -524,7 +524,7 @@ git commit -m "feat(design-system): add token-based component library"
 
 ### Task 4: Popup refactor + settings view
 
-Popup'ı token/komponentlere taşı, ayarlar görünümünü ve tema/depolama mantığını ekle.
+Move the popup to tokens/components, and add the settings view and theme/storage logic.
 
 **Files:**
 - Modify: `src/popup/popup.html`
@@ -533,11 +533,11 @@ Popup'ı token/komponentlere taşı, ayarlar görünümünü ve tema/depolama ma
 
 **Interfaces:**
 - Consumes: `src/shared/settings.js` (`DEFAULT_SETTINGS`, `resolveTheme`); `components.css`, `tokens.css`, `base.css`.
-- Produces: `chrome.storage.local` içinde `settings` nesnesi (`DEFAULT_SETTINGS` şekli). `applyTheme(theme)` fonksiyonu `<html>`'e `data-theme` uygular/siler.
+- Produces: a `settings` object in `chrome.storage.local` (shape of `DEFAULT_SETTINGS`). The `applyTheme(theme)` function applies/removes `data-theme` on `<html>`.
 
-- [ ] **Step 1: `src/popup/popup.html` — head + iki görünüm + ayarlar butonu**
+- [ ] **Step 1: `src/popup/popup.html` — head + two views + settings button**
 
-`<head>` içinde, `popup.css`'ten önce token/base/components bağla:
+In `<head>`, link token/base/components before `popup.css`:
 
 ```html
     <link rel="stylesheet" href="../styles/tokens.css" />
@@ -546,54 +546,54 @@ Popup'ı token/komponentlere taşı, ayarlar görünümünü ve tema/depolama ma
     <link rel="stylesheet" href="popup.css" />
 ```
 
-`<body>` içeriğini iki görünümlü yapıya çevir (giriş + ayarlar), scripti module yap:
+Convert the `<body>` content into a two-view structure (reader + settings), and make the script a module:
 
 ```html
   <body>
     <div class="popup-container">
       <div class="popup-header">
         <h1 class="popup-title">Fast Reader</h1>
-        <button id="settingsBtn" class="icon-btn" title="Ayarlar" aria-label="Ayarlar">⚙</button>
+        <button id="settingsBtn" class="icon-btn" title="Settings" aria-label="Settings">⚙</button>
       </div>
 
-      <!-- GİRİŞ GÖRÜNÜMÜ -->
+      <!-- READER VIEW -->
       <section id="readerView" class="popup-body">
         <textarea id="textInput" class="field text-input"
-          placeholder="Metni buraya girin veya yapıştırın..." rows="10"></textarea>
+          placeholder="Enter or paste text here..." rows="10"></textarea>
         <div class="input-actions">
-          <button id="startBtn" class="btn btn--primary">Başlat</button>
-          <button id="clearBtn" class="btn btn--secondary">Temizle</button>
+          <button id="startBtn" class="btn btn--primary">Start</button>
+          <button id="clearBtn" class="btn btn--secondary">Clear</button>
         </div>
       </section>
 
-      <!-- AYARLAR GÖRÜNÜMÜ -->
+      <!-- SETTINGS VIEW -->
       <section id="settingsView" class="popup-body settings-view" hidden>
-        <button id="backBtn" class="btn btn--ghost back-btn" aria-label="Geri">← Geri</button>
+        <button id="backBtn" class="btn btn--ghost back-btn" aria-label="Back">← Back</button>
 
         <div class="setting-row">
-          <label for="defaultWpm">Varsayılan hız</label>
+          <label for="defaultWpm">Default speed</label>
           <div class="setting-control">
-            <span id="defaultWpmValue">250</span> kel/dk
+            <span id="defaultWpmValue">250</span> wpm
             <input id="defaultWpm" class="slider" type="range" min="100" max="1000" value="250" />
           </div>
         </div>
 
         <div class="setting-row">
-          <span>Tema</span>
-          <div class="segmented" id="themeSeg" role="group" aria-label="Tema">
-            <button class="segmented__option" data-theme-value="dark">Koyu</button>
-            <button class="segmented__option" data-theme-value="light">Açık</button>
-            <button class="segmented__option" data-theme-value="system">Sistem</button>
+          <span>Theme</span>
+          <div class="segmented" id="themeSeg" role="group" aria-label="Theme">
+            <button class="segmented__option" data-theme-value="dark">Dark</button>
+            <button class="segmented__option" data-theme-value="light">Light</button>
+            <button class="segmented__option" data-theme-value="system">System</button>
           </div>
         </div>
 
         <div class="setting-row">
-          <label for="orpToggle">ORP odak çizgisi</label>
+          <label for="orpToggle">ORP focus line</label>
           <label class="switch"><input id="orpToggle" type="checkbox" /><span class="switch__track"></span></label>
         </div>
 
         <div class="setting-row">
-          <label for="contextToggle">Bağlam kelimeleri</label>
+          <label for="contextToggle">Context words</label>
           <label class="switch"><input id="contextToggle" type="checkbox" /><span class="switch__track"></span></label>
         </div>
       </section>
@@ -609,9 +609,9 @@ Popup'ı token/komponentlere taşı, ayarlar görünümünü ve tema/depolama ma
   </body>
 ```
 
-- [ ] **Step 2: `src/popup/popup.css` — token'lara taşı + ayarlar stilleri**
+- [ ] **Step 2: `src/popup/popup.css` — move to tokens + settings styles**
 
-`popup.css`'i baştan yaz (eski sabit renkler ve `.action-btn`/`.btn-*` blokları komponentlere devredildiği için kaldırılır):
+Rewrite `popup.css` from scratch (the old fixed colors and the `.action-btn`/`.btn-*` blocks are removed since they are delegated to components):
 
 ```css
 body { width: 400px; min-height: 500px; }
@@ -628,7 +628,7 @@ body { width: 400px; min-height: 500px; }
 }
 .popup-title {
   font-size: 1.375rem; font-weight: var(--fw-bold);
-  color: var(--accent); /* sade accent — gradyan yok */
+  color: var(--accent); /* plain accent — no gradient */
 }
 
 .popup-body {
@@ -639,7 +639,7 @@ body { width: 400px; min-height: 500px; }
 .input-actions { display: flex; gap: var(--space-3); }
 .input-actions .btn { flex: 1; }
 
-/* Ayarlar görünümü */
+/* Settings view */
 .settings-view { gap: var(--space-6); }
 .back-btn { align-self: flex-start; min-height: auto; padding: var(--space-2) var(--space-3); }
 .setting-row {
@@ -663,7 +663,7 @@ body { width: 400px; min-height: 500px; }
 .creator-credit:hover { color: var(--accent); }
 .creator-icon { width: 16px; height: 16px; border-radius: var(--radius-full); object-fit: cover; }
 
-/* Hata bildirimi (popup.js'ten taşındı) */
+/* Error notification (moved from popup.js) */
 .error-notification {
   position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
   background: var(--danger); color: #fff;
@@ -676,9 +676,9 @@ body { width: 400px; min-height: 500px; }
   to { transform: translateX(-50%) translateY(0); opacity: 1; } }
 ```
 
-- [ ] **Step 3: `src/popup/popup.js` — module + ayarlar + tema + görünüm geçişi**
+- [ ] **Step 3: `src/popup/popup.js` — module + settings + theme + view switching**
 
-Baştan yaz:
+Rewrite from scratch:
 
 ```js
 import { DEFAULT_SETTINGS, resolveTheme } from "../shared/settings.js";
@@ -723,7 +723,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   els.textInput.focus();
 });
 
-// --- Görünüm geçişi ---
+// --- View switching ---
 els.settingsBtn.addEventListener("click", () => {
   els.readerView.hidden = true; els.settingsView.hidden = false;
 });
@@ -731,7 +731,7 @@ els.backBtn.addEventListener("click", () => {
   els.settingsView.hidden = true; els.readerView.hidden = false; els.textInput.focus();
 });
 
-// --- Ayar kontrolleri ---
+// --- Settings controls ---
 els.defaultWpm.addEventListener("input", (e) => {
   settings.defaultWpm = Number(e.target.value);
   els.defaultWpmValue.textContent = settings.defaultWpm; saveSettings();
@@ -746,7 +746,7 @@ els.themeSeg.addEventListener("click", (e) => {
 els.orpToggle.addEventListener("change", (e) => { settings.orp = e.target.checked; saveSettings(); });
 els.contextToggle.addEventListener("change", (e) => { settings.contextWords = e.target.checked; saveSettings(); });
 
-// --- Giriş görünümü ---
+// --- Reader view ---
 els.clearBtn.addEventListener("click", () => {
   els.textInput.value = ""; els.textInput.focus();
   chrome.storage.local.set({ popupTextInput: "" });
@@ -759,14 +759,14 @@ els.textInput.addEventListener("keydown", (e) => {
 });
 els.startBtn.addEventListener("click", async () => {
   const text = els.textInput.value.trim();
-  if (!text || text.length < 10) { showError("Lütfen en az 10 karakter girin"); return; }
+  if (!text || text.length < 10) { showError("Please enter at least 10 characters"); return; }
   try {
     els.startBtn.disabled = true;
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     await chrome.tabs.sendMessage(tab.id, { type: "START_FAST_READER_FROM_POPUP", text });
     setTimeout(() => window.close(), 300);
   } catch (err) {
-    console.error(err); showError("Fast Reader başlatılamadı"); els.startBtn.disabled = false;
+    console.error(err); showError("Could not start Fast Reader"); els.startBtn.disabled = false;
   }
 });
 
@@ -778,18 +778,18 @@ function showError(message) {
 }
 ```
 
-- [ ] **Step 4: Manifest'i module popup için doğrula (değişiklik gerekmez)**
+- [ ] **Step 4: Verify the manifest for the module popup (no change required)**
 
-MV3'te popup sayfası `<script type="module">` destekler; `web_accessible_resources` gerekmez (popup uzantı sayfasıdır). `src/shared/settings.js` popup'a göreli import ile yüklenir. Ek manifest değişikliği YOK (web erişimi Task 5'te HUD için eklenecek).
+In MV3 the popup page supports `<script type="module">`; `web_accessible_resources` is not required (the popup is an extension page). `src/shared/settings.js` is loaded via a relative import from the popup. NO additional manifest change (web access will be added for the HUD in Task 5).
 
-- [ ] **Step 5: Chrome'da doğrula**
+- [ ] **Step 5: Verify in Chrome**
 
-Uzantıyı reload et. Beklenen:
-1. Popup açık/koyu temaya göre görünür; başlık sade turuncu; butonlar yeni stil.
-2. ⚙ → ayarlar görünümü açılır; ← ile geri döner.
-3. Tema segmented'ından "Açık" seç → popup anında açık temaya döner; popup'ı kapatıp aç → seçim korunur (storage).
-4. Varsayılan hız slider'ı değeri günceller ve saklanır.
-5. Metin gir → Başlat çalışır (aktif sekmede content script varsa HUD açılır).
+Reload the extension. Expected:
+1. The popup renders according to the light/dark theme; the title is plain orange; the buttons use the new style.
+2. ⚙ → the settings view opens; ← returns.
+3. Select "Light" from the theme segmented → the popup switches to light immediately; close and reopen the popup → the selection persists (storage).
+4. The default-speed slider updates the value and stores it.
+5. Enter text → Start works (if the active tab has a content script, the HUD opens).
 
 - [ ] **Step 6: Commit**
 
@@ -802,27 +802,27 @@ git commit -m "feat(popup): token refactor + in-popup settings view with theme c
 
 ### Task 5: HUD restyle to tokens (always-dark) + rename
 
-`styles.css`'i `hud.css`'e taşı, token'lara çevir, HUD'u her zaman koyu sabitle.
+Move `styles.css` to `hud.css`, convert it to tokens, and pin the HUD to always-dark.
 
 **Files:**
 - Rename: `src/styles/styles.css` → `src/styles/hud.css`
-- Modify: `src/styles/hud.css` (yeniden adlandırılan dosya)
+- Modify: `src/styles/hud.css` (the renamed file)
 - Modify: `src/hud/hud.html`
 - Modify: `manifest.json`
 
 **Interfaces:**
 - Consumes: `tokens.css`, `base.css`, `components.css`.
-- Produces: `web_accessible_resources`'ta `src/styles/hud.css`, `src/styles/tokens.css`, `src/styles/base.css`, `src/styles/components.css`, `src/shared/settings.js` erişilebilir.
+- Produces: `src/styles/hud.css`, `src/styles/tokens.css`, `src/styles/base.css`, `src/styles/components.css`, `src/shared/settings.js` made accessible in `web_accessible_resources`.
 
-- [ ] **Step 1: Dosyayı yeniden adlandır**
+- [ ] **Step 1: Rename the file**
 
 ```bash
 git mv src/styles/styles.css src/styles/hud.css
 ```
 
-- [ ] **Step 2: `src/hud/hud.html` — head'i token zincirine bağla + kök koyu sabitle**
+- [ ] **Step 2: `src/hud/hud.html` — link the head to the token chain + pin the root to dark**
 
-`<html lang="en">` → `<html lang="tr" data-theme="dark">` (HUD her zaman koyu). `<head>` içindeki `<link rel="stylesheet" href="../styles/styles.css" />` satırını şununla değiştir:
+`<html lang="en">` → `<html lang="tr" data-theme="dark">` (the HUD is always dark). Replace the `<link rel="stylesheet" href="../styles/styles.css" />` line in `<head>` with:
 
 ```html
     <link rel="stylesheet" href="../styles/tokens.css" />
@@ -831,43 +831,43 @@ git mv src/styles/styles.css src/styles/hud.css
     <link rel="stylesheet" href="../styles/hud.css" />
 ```
 
-- [ ] **Step 3: `src/styles/hud.css` — sabit değerleri token'la değiştir**
+- [ ] **Step 3: `src/styles/hud.css` — replace fixed values with tokens**
 
-Aşağıdaki eşleme tablosuna göre dosyadaki TÜM sabit değerleri değiştir (bul-değiştir). HUD kökü `data-theme="dark"` olduğundan token'lar koyu değerlere çözülür.
+Replace ALL fixed values in the file according to the mapping table below (find-and-replace). Since the HUD root is `data-theme="dark"`, the tokens resolve to the dark values.
 
-| Eski (sabit) | Yeni (token) |
+| Old (constant) | New (token) |
 |---|---|
-| `rgba(0, 0, 0, 0.85)` (hud zemin) | `var(--surface-overlay)` |
+| `rgba(0, 0, 0, 0.85)` (hud background) | `var(--surface-overlay)` |
 | `linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)` | `var(--accent)` |
 | `linear-gradient(135deg, #ff7b45 0%, #ffa726 100%)` (hover) | `var(--accent-hover)` |
 | `#ff6b35` (speed-display, center-char) | `var(--accent)` |
-| `#ffffff` / `white` metin | `var(--text)` |
+| `#ffffff` / `white` text | `var(--text)` |
 | `rgba(255,255,255,0.9/0.8/0.7)` | `var(--text-muted)` |
-| `rgba(255, 255, 255, 0.3)` (bağlam/preview) | `var(--text-faint)` |
+| `rgba(255, 255, 255, 0.3)` (context/preview) | `var(--text-faint)` |
 | `rgba(255, 255, 255, 0.1/0.2)` (border/track) | `var(--border)` |
 | `rgba(255, 255, 255, 0.16)` | `var(--border-strong)` |
 | `border-radius: 12px/16px/8px` | `var(--radius-md/lg/sm)` |
 | `padding/gap: 8/12/16/24px` | `var(--space-2/3/4/6)` |
-| `#667eea` (focus outline — HATA) | sil (global `:focus-visible` base.css'te) |
-| kapat butonu kırmızı gradyan | `.icon-btn .icon-btn--danger` (bkz. aşağı) |
-| `::before` kayan parıltı blokları (`.btn::before`, `.action-btn::before`) | **tamamen sil** |
+| `#667eea` (focus outline — BUG) | remove (global `:focus-visible` in base.css) |
+| close button red gradient | `.icon-btn .icon-btn--danger` (see below) |
+| `::before` sliding shimmer blocks (`.btn::before`, `.action-btn::before`) | **remove entirely** |
 | `transform: translateY(-2px/-3px)` hover | `transform: scale(1.02)` |
 
-Ek olarak şu yapısal düzenlemeler:
-- `.fast-reader-hud` gradyan `::before` overlay bloğunu **sil** (rafine yön).
-- `.close-btn`'in kendi renk/gradyan kurallarını sil; markup Task 6'da `class="icon-btn icon-btn--danger"` olacak, bu yüzden hud.css'te yalnızca konum kalsın:
+In addition, these structural adjustments:
+- **Remove** the `.fast-reader-hud` gradient `::before` overlay block (refined direction).
+- Remove `.close-btn`'s own color/gradient rules; the markup in Task 6 will be `class="icon-btn icon-btn--danger"`, so in hud.css only the positioning remains:
   ```css
   .close-btn { position: absolute; top: var(--space-4); right: var(--space-4); z-index: 10; }
   ```
-- `.btn` (HUD içi) çakışmasını önlemek için HUD butonları da `components.css`'teki `.btn` sınıflarını kullanacak (markup Task 6). hud.css'teki eski `.btn`, `.btn-primary`, `.btn-secondary` bloklarını **sil**.
-- `.fast-reader-controls`'u panel'e yaklaştır: `background: var(--surface-overlay); backdrop-filter: var(--blur-panel); box-shadow: var(--elevation-2); border: 1px solid var(--border); border-radius: var(--radius-lg);`
-- `kbd` bloğunu sil (markup `.kbd` komponentini kullanacak).
-- Alt bölümdeki `@media (prefers-contrast: high)` ve responsive blokları koru; içlerindeki sabit renkleri de token'la güncelle.
-- `scrollbar` blokları base.css'e taşındı → hud.css'teki scrollbar bloklarını **sil**.
+- To avoid a `.btn` (inside the HUD) collision, the HUD buttons will also use the `.btn` classes from `components.css` (markup in Task 6). **Remove** the old `.btn`, `.btn-primary`, `.btn-secondary` blocks in hud.css.
+- Bring `.fast-reader-controls` closer to the panel: `background: var(--surface-overlay); backdrop-filter: var(--blur-panel); box-shadow: var(--elevation-2); border: 1px solid var(--border); border-radius: var(--radius-lg);`
+- Remove the `kbd` block (the markup will use the `.kbd` component).
+- Keep the `@media (prefers-contrast: high)` and responsive blocks in the lower section; also update the fixed colors inside them to tokens.
+- The `scrollbar` blocks were moved to base.css → **remove** the scrollbar blocks in hud.css.
 
-- [ ] **Step 4: `manifest.json` — web_accessible_resources güncelle**
+- [ ] **Step 4: `manifest.json` — update web_accessible_resources**
 
-`web_accessible_resources[0].resources` dizisini şu şekilde değiştir:
+Change the `web_accessible_resources[0].resources` array to:
 
 ```json
       "resources": [
@@ -883,14 +883,14 @@ Ek olarak şu yapısal düzenlemeler:
       ],
 ```
 
-- [ ] **Step 5: Chrome'da doğrula**
+- [ ] **Step 5: Verify in Chrome**
 
-Uzantıyı reload et. Bir sayfada 10+ kelimelik metin seç → seçim ikonuna tıkla (veya popup'tan Başlat). Beklenen:
-1. HUD açılır ve **sistem teması açık olsa bile koyu** görünür.
-2. Kontrol paneli, butonlar, slider, progress, kbd rozetleri token'lı yeni stille görünür.
-3. Kayan parıltı efekti YOK; hover'da butonlar hafif büyür.
-4. Kapat butonu nötr; üzerine gelince kırmızıya döner.
-5. Console'da 404 (eksik css/js) veya CSP hatası YOK.
+Reload the extension. On a page, select 10+ words of text → click the selection icon (or Start from the popup). Expected:
+1. The HUD opens and appears **dark even when the system theme is light**.
+2. The control panel, buttons, slider, progress, and kbd badges render with the new token-based style.
+3. NO sliding shimmer effect; on hover the buttons grow slightly.
+4. The close button is neutral; on hover it turns red.
+5. NO 404 (missing css/js) or CSP errors in the console.
 
 - [ ] **Step 6: Commit**
 
@@ -903,7 +903,7 @@ git commit -m "feat(hud): token restyle, always-dark, drop shimmer/gradient nois
 
 ### Task 6: HUD reading UX (ORP line, remaining time, context toggle)
 
-HUD davranışını modülleştir ve okuma UX'ini geliştir; ayarları uygula.
+Modularize the HUD behavior and improve the reading UX; apply the settings.
 
 **Files:**
 - Modify: `src/hud/hud.html`
@@ -912,19 +912,19 @@ HUD davranışını modülleştir ve okuma UX'ini geliştir; ayarları uygula.
 
 **Interfaces:**
 - Consumes: `src/shared/settings.js` (`DEFAULT_SETTINGS`, `splitWords`, `estimateRemainingMs`, `formatDuration`, `orpIndex`).
-- Produces: HUD `INIT_FAST_READER` mesajı sonrası `chrome.storage.local`'dan `settings` okur; `settings.orp`/`settings.contextWords`/`settings.defaultWpm` uygulanır.
+- Produces: after the HUD `INIT_FAST_READER` message, reads `settings` from `chrome.storage.local`; applies `settings.orp`/`settings.contextWords`/`settings.defaultWpm`.
 
-- [ ] **Step 1: `src/hud/hud.html` — ORP çizgisi, kalan süre, buton/kbd/kapat markup**
+- [ ] **Step 1: `src/hud/hud.html` — ORP line, remaining time, button/kbd/close markup**
 
-`<html ... data-theme="dark">` (Task 5). Kapat butonu ve kbd'yi komponentlere geçir; ORP çizgisi ve kalan süre ekle. `<body>` içeriğinin ilgili kısımlarını şu şekilde güncelle:
+`<html ... data-theme="dark">` (Task 5). Move the close button and kbd to components; add the ORP line and remaining time. Update the relevant parts of the `<body>` content as follows:
 
 ```html
-    <button id="closeBtn" class="close-btn icon-btn icon-btn--danger" title="Kapat" aria-label="Kapat">✖</button>
+    <button id="closeBtn" class="close-btn icon-btn icon-btn--danger" title="Close" aria-label="Close">✖</button>
     <div class="fast-reader-controls">
       <h2 class="title">Fast Reader</h2>
       <div class="speed-control">
-        <label for="speed">Okuma hızı</label>
-        <div class="speed-display"><span id="speedValue">250</span> kel/dk</div>
+        <label for="speed">Reading speed</label>
+        <div class="speed-display"><span id="speedValue">250</span> wpm</div>
         <input id="speed" class="slider" type="range" min="100" max="1000" value="250" />
       </div>
       <div class="progress-info">
@@ -933,9 +933,9 @@ HUD davranışını modülleştir ve okuma UX'ini geliştir; ayarları uygula.
         <div class="progress"><div id="progress" class="progress__fill"></div></div>
       </div>
       <div class="buttons">
-        <button id="startBtn" class="btn btn--primary">Başlat</button>
-        <button id="pauseBtn" class="btn btn--secondary" disabled>Duraklat</button>
-        <button id="resetBtn" class="btn btn--secondary">Sıfırla</button>
+        <button id="startBtn" class="btn btn--primary">Start</button>
+        <button id="pauseBtn" class="btn btn--secondary" disabled>Pause</button>
+        <button id="resetBtn" class="btn btn--secondary">Reset</button>
       </div>
     </div>
 
@@ -951,16 +951,16 @@ HUD davranışını modülleştir ve okuma UX'ini geliştir; ayarları uygula.
     </div>
 
     <div class="keyboard-shortcuts">
-      <div class="shortcut"><kbd class="kbd">Space</kbd> Oynat/Duraklat</div>
-      <div class="shortcut"><kbd class="kbd">R</kbd> Sıfırla</div>
-      <div class="shortcut"><kbd class="kbd">Esc</kbd> Kapat</div>
+      <div class="shortcut"><kbd class="kbd">Space</kbd> Play/Pause</div>
+      <div class="shortcut"><kbd class="kbd">R</kbd> Reset</div>
+      <div class="shortcut"><kbd class="kbd">Esc</kbd> Close</div>
     </div>
     <script type="module" src="hud.js"></script>
 ```
 
-- [ ] **Step 2: `src/styles/hud.css` — ORP çizgisi + kalan süre stilleri ekle**
+- [ ] **Step 2: `src/styles/hud.css` — add ORP line + remaining time styles**
 
-Dosya sonuna ekle:
+Add to the end of the file:
 
 ```css
 .orp-guide {
@@ -973,9 +973,9 @@ Dosya sonuna ekle:
 .current-word .center-char { color: var(--accent); }
 ```
 
-- [ ] **Step 3: `src/hud/hud.js` — module + ayarları uygula + ORP/kalan süre**
+- [ ] **Step 3: `src/hud/hud.js` — module + apply settings + ORP/remaining time**
 
-Baştan yaz (davranış korunur, ayarlar + UX eklenir):
+Rewrite from scratch (behavior preserved, settings + UX added):
 
 ```js
 import {
@@ -1014,7 +1014,7 @@ window.addEventListener("message", async (event) => {
     words = splitWords(event.data.text);
     index = 0;
     updateAll();
-    el.currentWord.textContent = "Başlamaya hazır...";
+    el.currentWord.textContent = "Ready to start...";
     el.prevWord.textContent = ""; el.nextWord.textContent = "";
   }
 });
@@ -1029,12 +1029,12 @@ el.speed.addEventListener("input", (e) => {
 el.startBtn.addEventListener("click", () => {
   if (!words.length) return;
   isReading = true; paused = false;
-  el.startBtn.disabled = true; el.pauseBtn.disabled = false; el.pauseBtn.textContent = "Duraklat";
+  el.startBtn.disabled = true; el.pauseBtn.disabled = false; el.pauseBtn.textContent = "Pause";
   startReading();
 });
 el.pauseBtn.addEventListener("click", () => {
-  if (paused) { paused = false; el.pauseBtn.textContent = "Duraklat"; startReading(); }
-  else { paused = true; el.pauseBtn.textContent = "Devam"; clearInterval(interval); }
+  if (paused) { paused = false; el.pauseBtn.textContent = "Pause"; startReading(); }
+  else { paused = true; el.pauseBtn.textContent = "Resume"; clearInterval(interval); }
 });
 el.resetBtn.addEventListener("click", resetReader);
 el.closeBtn.addEventListener("click", () => {
@@ -1055,8 +1055,8 @@ function startReading() {
     if (paused) return;
     if (index >= words.length) {
       clearInterval(interval); isReading = false;
-      el.startBtn.disabled = false; el.pauseBtn.disabled = true; el.pauseBtn.textContent = "Duraklat";
-      el.currentWord.textContent = "Okuma tamamlandı!";
+      el.startBtn.disabled = false; el.pauseBtn.disabled = true; el.pauseBtn.textContent = "Pause";
+      el.currentWord.textContent = "Reading complete!";
       el.prevWord.textContent = ""; el.nextWord.textContent = "";
       return;
     }
@@ -1104,23 +1104,23 @@ function updateTextPreview() {
 
 function resetReader() {
   clearInterval(interval); index = 0; isReading = false; paused = false;
-  el.startBtn.disabled = false; el.pauseBtn.disabled = true; el.pauseBtn.textContent = "Duraklat";
+  el.startBtn.disabled = false; el.pauseBtn.disabled = true; el.pauseBtn.textContent = "Pause";
   updateAll();
-  el.currentWord.textContent = "Başlamaya hazır..."; el.currentWord.classList.remove("long-word");
+  el.currentWord.textContent = "Ready to start..."; el.currentWord.classList.remove("long-word");
   el.prevWord.textContent = ""; el.nextWord.textContent = "";
   el.prevWord.classList.remove("long-word"); el.nextWord.classList.remove("long-word");
 }
 ```
 
-- [ ] **Step 4: Chrome'da doğrula**
+- [ ] **Step 4: Verify in Chrome**
 
-Uzantıyı reload et. Popup'tan Başlat ile HUD'u aç. Beklenen:
-1. HUD açılışta popup'taki varsayılan hızı kullanır.
-2. Space ile okuma başlar; kelimeler orta karakter turuncu vurgulu akar.
-3. `progress-info`'da `x / y` ve **kalan süre** (`m:ss`) görünür; hız değişince kalan süre güncellenir.
-4. Ayarlar'da **ORP odak çizgisi kapalı** iken HUD'da dikey çizgi görünmez; açıkken görünür.
-5. Ayarlar'da **Bağlam kelimeleri kapalı** iken önceki/sonraki kelimeler boş kalır.
-6. Reset/kapat/klavye kısayolları çalışır.
+Reload the extension. Open the HUD via Start from the popup. Expected:
+1. On open, the HUD uses the default speed from the popup.
+2. Space starts reading; the words flow with the center character highlighted orange.
+3. `progress-info` shows `x / y` and the **remaining time** (`m:ss`); when the speed changes, the remaining time updates.
+4. When **ORP focus line is off** in settings, the vertical line is not shown in the HUD; when on, it is shown.
+5. When **Context words is off** in settings, the previous/next words stay empty.
+6. Reset/close/keyboard shortcuts work.
 
 - [ ] **Step 5: Commit**
 
@@ -1133,20 +1133,20 @@ git commit -m "feat(hud): ORP guide, remaining time, context toggle, settings-dr
 
 ### Task 7: Selection FAB (content.css) to tokens
 
-Content script seçim ikonu ve iframe'i token'lara taşı. FAB her zaman koyu okunur olmalı (sayfa üstünde).
+Move the content-script selection icon and iframe to tokens. The FAB must always be dark and legible (on top of the page).
 
 **Files:**
 - Modify: `src/styles/content.css`
 
 **Interfaces:**
-- Consumes: `tokens.css` DEĞİL — content.css sayfaya enjekte edilir ve token dosyası orada yüklü değildir. Bu yüzden FAB **kendi kendine yeten** sabit değerlerle kalır (tokensız), ama design system paletiyle uyumlu. (Manifest content_scripts yalnızca content.css yükler.)
+- Consumes: NOT `tokens.css` — content.css is injected into the page and the token file is not loaded there. Therefore the FAB stays **self-contained** with fixed values (token-less), but consistent with the design-system palette. (Manifest content_scripts loads only content.css.)
 
-- [ ] **Step 1: `src/styles/content.css` — FAB'ı rafine et, iframe'i sadeleştir**
+- [ ] **Step 1: `src/styles/content.css` — refine the FAB, simplify the iframe**
 
-Baştan yaz (palet spec ile uyumlu sabitler; enjekte bağlamda token yok):
+Rewrite from scratch (constants consistent with the spec palette; no tokens in the injected context):
 
 ```css
-/* Seçim ikonu — sayfaya enjekte edilir, token bağımsız */
+/* Selection icon — injected into the page, token-independent */
 .fast-reader-icon {
   position: absolute;
   width: 2rem; height: 2rem;
@@ -1168,9 +1168,9 @@ Baştan yaz (palet spec ile uyumlu sabitler; enjekte bağlamda token yok):
 }
 ```
 
-- [ ] **Step 2: Chrome'da doğrula**
+- [ ] **Step 2: Verify in Chrome**
 
-Uzantıyı reload et. Bir sayfada 10+ kelime seç. Beklenen: turuncu çerçeveli, tek boyutlu ikon imlecin yanında belirir; hover'da hafif büyür (kayan parıltı yok); tıklayınca HUD açılır. Seçim kalkınca ikon kaybolur.
+Reload the extension. On a page, select 10+ words. Expected: a single-size icon with an orange border appears next to the cursor; on hover it grows slightly (no sliding shimmer); clicking opens the HUD. When the selection clears, the icon disappears.
 
 - [ ] **Step 3: Commit**
 
@@ -1183,42 +1183,42 @@ git commit -m "feat(content): refine selection FAB to match design system"
 
 ### Task 8: Cleanup, version bump, docs
 
-Son rötuşlar ve sürüm.
+Final touches and versioning.
 
 **Files:**
 - Modify: `manifest.json`
 - Modify: `README.md`
 
 **Interfaces:**
-- Consumes: tüm önceki task'lar tamamlanmış olmalı.
+- Consumes: all previous tasks must be complete.
 
 - [ ] **Step 1: `manifest.json` — version bump**
 
 `"version": "2.0.0"` → `"version": "3.0.0"`.
 
-- [ ] **Step 2: `README.md` — sürüm geçmişi ve tema/ayarlar notu**
+- [ ] **Step 2: `README.md` — version history and theme/settings note**
 
-`## 📊 Version History` bölümünün başına ekle:
+Add to the top of the `## 📊 Version History` section:
 
 ```markdown
 - **v3.0** (Current)
-  - Token tabanlı design system (koyu + otomatik açık tema)
-  - Popup içi ayarlar: varsayılan hız, tema (Koyu/Açık/Sistem), ORP ve bağlam toggle'ları
-  - HUD: ORP odak çizgisi, kalan süre göstergesi, rafine görünüm (parıltı/gradyan gürültüsü kaldırıldı)
-  - Erişilebilirlik: WCAG AA kontrast, tutarlı focus halkası, reduced-motion
+  - Token-based design system (dark + automatic light theme)
+  - In-popup settings: default speed, theme (Dark/Light/System), ORP and context toggles
+  - HUD: ORP focus line, remaining-time indicator, refined look (shimmer/gradient noise removed)
+  - Accessibility: WCAG AA contrast, consistent focus ring, reduced-motion
 ```
 
-Ayrıca "Design Philosophy" bölümüne "Light & Dark: otomatik + manuel tema seçimi" satırını ekle.
+Also add the line "Light & Dark: automatic + manual theme selection" to the "Design Philosophy" section.
 
-- [ ] **Step 3: Tam regresyon doğrulaması**
+- [ ] **Step 3: Full regression verification**
 
-Uzantıyı reload et, uçtan uca kontrol:
-1. `node --test` → tüm birim testler PASS.
-2. Popup: açık/koyu (sistem + manuel), ayarlar kalıcı, Başlat/Temizle çalışır.
-3. Seçimle HUD: FAB → HUD koyu; okuma, hız, kalan süre, ORP/bağlam ayarları uygulanır.
-4. Sağ tık menüsü (FRead) → HUD açılır (background.js akışı bozulmadı).
-5. Console'da hata/404/CSP uyarısı YOK.
-6. `grep -rn "667eea\|f7931e\|#ff6b35" src/` → yalnızca `tokens.css` (primitive tanımı) ve `content.css` (enjekte, tokensız) sonuç vermeli; başka yerde sabit kalmamalı.
+Reload the extension and check end-to-end:
+1. `node --test` → all unit tests PASS.
+2. Popup: light/dark (system + manual), settings persist, Start/Clear work.
+3. HUD via selection: FAB → HUD dark; reading, speed, remaining time, and ORP/context settings applied.
+4. Right-click menu (FRead) → HUD opens (the background.js flow is not broken).
+5. NO error/404/CSP warning in the console.
+6. `grep -rn "667eea\|f7931e\|#ff6b35" src/` → should return only `tokens.css` (primitive definition) and `content.css` (injected, token-less); no constants should remain elsewhere.
 
 - [ ] **Step 4: Commit**
 
@@ -1229,9 +1229,9 @@ git commit -m "chore: bump to v3.0.0 and update docs"
 
 ---
 
-## Self-Review Notları
+## Self-Review Notes
 
-- **Spec kapsamı:** Token mimarisi (Task 1) · saf mantık/tema çözümleme (Task 2) · komponentler (Task 3) · popup + ayarlar + tema seçimi (Task 4) · HUD always-dark restyle (Task 5) · HUD okuma UX/ORP/kalan süre (Task 6) · seçim FAB (Task 7) · erişilebilirlik (Task 1 base + tüm task doğrulamaları) · migrasyon/temizlik/sürüm (Task 8). Spec'in 12 bölümü de bir task'a bağlı.
-- **Tip tutarlılığı:** `settings` nesnesi `{ defaultWpm, theme, orp, contextWords }` şekli Task 2/4/6'da aynı; `resolveTheme`/`applyTheme`, `splitWords`, `estimateRemainingMs`/`formatDuration`, `orpIndex` imzaları Task 2'de tanımlı ve tüketildikleri yerlerle uyumlu.
-- **Erişim modeli:** popup uzantı sayfası (module import serbest); HUD web'e enjekte iframe → `hud.js` + `settings.js` + tüm css `web_accessible_resources`'ta (Task 5). content.css enjekte bağlamda token'sız (Task 7 notu).
-- **Bilinçli kapsam dışı:** onboarding, tam yeniden tasarım, font kütüphanesi, kelime öbekleme (spec Bölüm 11).
+- **Spec coverage:** Token architecture (Task 1) · pure logic/theme resolution (Task 2) · components (Task 3) · popup + settings + theme selection (Task 4) · HUD always-dark restyle (Task 5) · HUD reading UX/ORP/remaining time (Task 6) · selection FAB (Task 7) · accessibility (Task 1 base + all task verifications) · migration/cleanup/versioning (Task 8). All 12 sections of the spec are tied to a task.
+- **Type consistency:** the `settings` object shape `{ defaultWpm, theme, orp, contextWords }` is the same across Tasks 2/4/6; the `resolveTheme`/`applyTheme`, `splitWords`, `estimateRemainingMs`/`formatDuration`, `orpIndex` signatures are defined in Task 2 and consistent with where they are consumed.
+- **Access model:** the popup is an extension page (module import allowed); the HUD is an iframe injected into the web → `hud.js` + `settings.js` + all css in `web_accessible_resources` (Task 5). content.css is token-less in the injected context (Task 7 note).
+- **Deliberately out of scope:** onboarding, a full redesign, a font library, word chunking (spec Section 11).

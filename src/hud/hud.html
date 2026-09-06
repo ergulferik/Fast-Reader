@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr" data-theme="dark">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,12 +16,12 @@
     <link rel="stylesheet" href="../styles/hud.css" />
   </head>
   <body class="fast-reader-hud">
-    <button id="closeBtn" class="close-btn icon-btn icon-btn--danger" title="Kapat" aria-label="Kapat">✖</button>
+    <button id="closeBtn" class="close-btn icon-btn icon-btn--danger" title="Close" aria-label="Close">✖</button>
     <div class="fast-reader-controls">
       <h2 class="title">Fast Reader</h2>
       <div class="speed-control">
-        <label for="speed">Okuma hızı</label>
-        <div class="speed-display"><span id="speedValue">250</span> kel/dk</div>
+        <label for="speed">Reading speed</label>
+        <div class="speed-display"><span id="speedValue">250</span> wpm</div>
         <input id="speed" class="slider" type="range" min="100" max="1000" value="250" />
       </div>
       <div class="progress-info">
@@ -30,9 +30,9 @@
         <div class="progress"><div id="progress" class="progress__fill"></div></div>
       </div>
       <div class="buttons">
-        <button id="startBtn" class="btn btn--primary">Başlat</button>
-        <button id="pauseBtn" class="btn btn--secondary" disabled>Duraklat</button>
-        <button id="resetBtn" class="btn btn--secondary">Sıfırla</button>
+        <button id="startBtn" class="btn btn--primary">Start</button>
+        <button id="pauseBtn" class="btn btn--secondary" disabled>Pause</button>
+        <button id="resetBtn" class="btn btn--secondary">Reset</button>
       </div>
     </div>
 
@@ -47,9 +47,9 @@
     </div>
 
     <div class="keyboard-shortcuts">
-      <div class="shortcut"><kbd class="kbd">Space</kbd> Oynat/Duraklat</div>
-      <div class="shortcut"><kbd class="kbd">R</kbd> Sıfırla</div>
-      <div class="shortcut"><kbd class="kbd">Esc</kbd> Kapat</div>
+      <div class="shortcut"><kbd class="kbd">Space</kbd> Play/Pause</div>
+      <div class="shortcut"><kbd class="kbd">R</kbd> Reset</div>
+      <div class="shortcut"><kbd class="kbd">Esc</kbd> Close</div>
     </div>
     <script type="module" src="hud.js"></script>
   </body>

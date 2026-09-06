@@ -3,7 +3,7 @@ import { DEFAULT_SETTINGS, resolveTheme } from "../shared/settings.js";
 const $ = (id) => document.getElementById(id);
 const els = {
   textInput: $("textInput"), startBtn: $("startBtn"), clearBtn: $("clearBtn"),
-  settingsBtn: $("settingsBtn"), backBtn: $("backBtn"),
+  settingsBtn: $("settingsBtn"), backBtn: $("backBtn"), popupTitle: $("popupTitle"),
   readerView: $("readerView"), settingsView: $("settingsView"),
   defaultWpm: $("defaultWpm"), defaultWpmValue: $("defaultWpmValue"),
   themeSeg: $("themeSeg"), contextToggle: $("contextToggle"),
@@ -39,15 +39,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   els.textInput.focus();
 });
 
-// --- Görünüm geçişi ---
-els.settingsBtn.addEventListener("click", () => {
-  els.readerView.hidden = true; els.settingsView.hidden = false;
-});
-els.backBtn.addEventListener("click", () => {
-  els.settingsView.hidden = true; els.readerView.hidden = false; els.textInput.focus();
-});
+// --- View switching ---
+function showSettings(on) {
+  els.settingsView.hidden = !on;
+  els.readerView.hidden = on;
+  els.backBtn.hidden = !on;
+  els.settingsBtn.hidden = on;
+  els.popupTitle.textContent = on ? "Settings" : "Fast Reader";
+}
+els.settingsBtn.addEventListener("click", () => showSettings(true));
+els.backBtn.addEventListener("click", () => { showSettings(false); els.textInput.focus(); });
 
-// --- Ayar kontrolleri ---
+// --- Settings controls ---
 els.defaultWpm.addEventListener("input", (e) => {
   settings.defaultWpm = Number(e.target.value);
   els.defaultWpmValue.textContent = settings.defaultWpm; saveSettings();
@@ -61,7 +64,7 @@ els.themeSeg.addEventListener("click", (e) => {
 });
 els.contextToggle.addEventListener("change", (e) => { settings.contextWords = e.target.checked; saveSettings(); });
 
-// --- Giriş görünümü ---
+// --- Input view ---
 els.clearBtn.addEventListener("click", () => {
   els.textInput.value = ""; els.textInput.focus();
   chrome.storage.local.set({ popupTextInput: "" });
@@ -74,7 +77,7 @@ els.textInput.addEventListener("keydown", (e) => {
 });
 els.startBtn.addEventListener("click", async () => {
   const text = els.textInput.value.trim();
-  if (!text || text.length < 10) { showError("Lütfen en az 10 karakter girin"); return; }
+  if (!text || text.length < 10) { showError("Please enter at least 10 characters"); return; }
   try {
     els.startBtn.disabled = true;
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -104,9 +107,9 @@ async function startInTab(tab, text) {
 function startErrorMessage(err) {
   const m = (err && err.message) || "";
   if (/chrome:\/\/|cannot access|extension gallery|chrome web store/i.test(m)) {
-    return "Bu sayfada çalışmıyor. Normal bir web sitesinde deneyin.";
+    return "This doesn't work on this page. Try it on a regular website.";
   }
-  return "Fast Reader başlatılamadı — sayfayı yenileyip tekrar deneyin.";
+  return "Couldn't start Fast Reader — refresh the page and try again.";
 }
 
 function showError(message) {

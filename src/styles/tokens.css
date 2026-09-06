@@ -1,4 +1,4 @@
-/* ============ PRIMITIVE (tema-bağımsız ham değerler) ============ */
+/* ============ PRIMITIVE (theme-independent raw values) ============ */
 :root {
   --orange-050: #fff1ea;
   --orange-400: #ff8551;
@@ -18,7 +18,7 @@
   --red-600: #dc2626;
   --green-500: #22c55e;
 
-  /* Ölçekler */
+  /* Scales */
   --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
   --space-6: 24px; --space-8: 32px;
   --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-full: 999px;
@@ -35,7 +35,7 @@
   --dur-fast: 120ms; --dur-base: 200ms;
 }
 
-/* ============ SEMANTİK — KOYU (varsayılan) ============ */
+/* ============ SEMANTIC — DARK (default) ============ */
 :root {
   --surface: var(--neutral-950);
   --surface-raised: var(--neutral-900);
@@ -57,8 +57,8 @@
   --accent-glow: 0 0 0 3px rgba(255,107,53,.24);
 }
 
-/* ============ SEMANTİK — AÇIK ============ */
-/* Sistem açık VE kullanıcı koyu'ya zorlamadıysa */
+/* ============ SEMANTIC — LIGHT ============ */
+/* System is light AND the user hasn't forced dark */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --surface: var(--neutral-100);
@@ -77,7 +77,7 @@
     --elevation-2: 0 4px 16px rgba(0,0,0,.12);
   }
 }
-/* Kullanıcı açık'a zorladıysa (sistem ne olursa olsun) */
+/* User has forced light (regardless of the system setting) */
 :root[data-theme="light"] {
   --surface: var(--neutral-100);
   --surface-raised: var(--neutral-000);
