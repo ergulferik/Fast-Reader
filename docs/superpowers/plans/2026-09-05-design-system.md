@@ -822,7 +822,7 @@ git mv src/styles/styles.css src/styles/hud.css
 
 - [ ] **Step 2: `src/hud/hud.html` — link the head to the token chain + pin the root to dark**
 
-`<html lang="en">` → `<html lang="tr" data-theme="dark">` (the HUD is always dark). Replace the `<link rel="stylesheet" href="../styles/styles.css" />` line in `<head>` with:
+`<html lang="en">` → `<html lang="en" data-theme="dark">` (the HUD is always dark). Replace the `<link rel="stylesheet" href="../styles/styles.css" />` line in `<head>` with:
 
 ```html
     <link rel="stylesheet" href="../styles/tokens.css" />
