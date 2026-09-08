@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Fast Reader",
-  "version": "2.0.0",
+  "version": "3.1.0",
   "description": "A simple Chrome extension for speed reading — shows selected text word by word in fullscreen for better focus.",
-  "permissions": ["activeTab", "storage", "contextMenus", "windows"],
+  "permissions": ["activeTab", "storage", "contextMenus", "windows", "scripting"],
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_icon": {
@@ -32,7 +32,12 @@
       "resources": [
         "src/hud/hud.html",
         "src/hud/hud.js",
-        "src/styles/*.css",
+        "src/shared/settings.js",
+        "src/styles/tokens.css",
+        "src/styles/base.css",
+        "src/styles/components.css",
+        "src/styles/hud.css",
+        "src/styles/content.css",
         "assets/icons/*"
       ],
       "matches": ["*://*/*"]
