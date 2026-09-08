@@ -145,7 +145,13 @@ This project is open source and available under the MIT License.
 
 ## 📊 Version History
 
-- **v3.0** (Current)
+- **v3.1** (Current)
+  - New opt-in setting: "Quick-read button on selection" (off by default) — the on-selection quick-read button now appears only when enabled
+  - Removed the HUD ORP focus line and its settings toggle
+  - Entire app and docs are now English-only
+  - Popup header spacing refinement
+
+- **v3.0**
   - Token-based design system (dark + automatic light theme)
   - In-popup settings: default speed, theme (Dark/Light/System), ORP and context toggles
   - HUD: ORP focus line, remaining-time indicator, refined appearance (glow/gradient noise removed)

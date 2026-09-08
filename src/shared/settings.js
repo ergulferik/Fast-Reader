@@ -2,6 +2,7 @@ export const DEFAULT_SETTINGS = {
   defaultWpm: 250,
   theme: "system",
   contextWords: true,
+  selectionIcon: false,
 };
 
 export function resolveTheme(theme) {

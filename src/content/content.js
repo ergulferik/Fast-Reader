@@ -1,6 +1,24 @@
 let fastReaderIcon = null;
 let currentIframe = null;
 
+// Whether the on-selection icon is shown. Managed from the popup Settings view
+// (stored under `settings.selectionIcon`); defaults to disabled when unset.
+let selectionIconEnabled = false;
+
+chrome.storage.local.get(["settings"]).then((res) => {
+  if (res.settings && typeof res.settings.selectionIcon === "boolean") {
+    selectionIconEnabled = res.settings.selectionIcon;
+  }
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.settings) {
+    const next = changes.settings.newValue || {};
+    selectionIconEnabled = next.selectionIcon === true;
+    if (!selectionIconEnabled) removeFastReaderIcon();
+  }
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "OPEN_FREAD_HUD") {
     if (message.text && message.text.length >= 10) {
@@ -30,6 +48,11 @@ document.addEventListener("selectionchange", () => {
 });
 
 document.addEventListener("mouseup", (e) => {
+  if (!selectionIconEnabled) {
+    removeFastReaderIcon();
+    return;
+  }
+
   const selectedText = window.getSelection().toString().trim();
   const text = selectedText.split(/\s+/).filter((word) => word.length > 0);
   if (!selectedText) {

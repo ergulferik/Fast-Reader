@@ -7,6 +7,7 @@ const els = {
   readerView: $("readerView"), settingsView: $("settingsView"),
   defaultWpm: $("defaultWpm"), defaultWpmValue: $("defaultWpmValue"),
   themeSeg: $("themeSeg"), contextToggle: $("contextToggle"),
+  selectionIconToggle: $("selectionIconToggle"),
 };
 
 let settings = { ...DEFAULT_SETTINGS };
@@ -24,6 +25,7 @@ async function loadSettings() {
   els.defaultWpm.value = settings.defaultWpm;
   els.defaultWpmValue.textContent = settings.defaultWpm;
   els.contextToggle.checked = settings.contextWords;
+  els.selectionIconToggle.checked = settings.selectionIcon;
   els.themeSeg.querySelectorAll(".segmented__option").forEach((b) =>
     b.setAttribute("aria-pressed", String(b.dataset.themeValue === settings.theme)));
 }
@@ -63,6 +65,7 @@ els.themeSeg.addEventListener("click", (e) => {
   applyTheme(settings.theme); saveSettings();
 });
 els.contextToggle.addEventListener("change", (e) => { settings.contextWords = e.target.checked; saveSettings(); });
+els.selectionIconToggle.addEventListener("change", (e) => { settings.selectionIcon = e.target.checked; saveSettings(); });
 
 // --- Input view ---
 els.clearBtn.addEventListener("click", () => {
